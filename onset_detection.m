@@ -1,33 +1,36 @@
-% Testing onset detection method from:
+% Implementing onset detection method from:
 % Duxbury, C., Bello, J.P., Davies, M. and Sandler, M. Complex domain Onset Detection for Musical Signals
 
-test = sin(2 * pi * 0:48000 * 440/48000);
-fft_test = fft(test);
-plot(abs(fft_test))
+[audio_in, fs] = audioread("Piano_scale.wav");
+fft_size = 4096;
+hop_size = 32;
 
-z1 = exp(1j)
-z2 = exp(1j * pi)
+onset_map = zeros(length(audio_in), 1);
+cursor = 1 + 2 * fft_size;
+w = waitbar(0, "Finding Note Onsets...");
 
-vec1 = [z1, z1]
-vec2 = [z2, z2]
+while cursor + fft_size < length(audio_in)
+    waitbar(cursor/length(audio_in), w);
+    preprev_fft = fft(audio_in(cursor - 2 * fft_size:cursor - fft_size));
+    prev_fft = fft(audio_in(cursor - fft_size:cursor));
+    current_fft = fft(audio_in(cursor:cursor + fft_size));
 
-stat_test = bin_stationarity(z1, z2, z2)
-stat_test_vec = stationarity(vec1, vec2, vec2)
+    onset_map(cursor:cursor+hop_size) = stationarity(current_fft, prev_fft, preprev_fft);
+
+    cursor = cursor + hop_size;
+end
+
+close(w)
+plot(onset_map)
 
 function output = stationarity(current_fft, previous_fft, preprevious_fft)
     target_mag = arrayfun(@abs, previous_fft);
-    target_arg = arrayfun(@angle, 2 * previous_fft - preprevious_fft);
+    previous_arg = arrayfun(@angle, previous_fft);
+    preprevious_arg = arrayfun(@angle, preprevious_fft);
+    target_arg = 2 * previous_arg - preprevious_arg;
     target = target_mag .* exp(1j * target_arg);
 
     real_diff = (arrayfun(@real, target) - arrayfun(@real, current_fft)).^2;
     imag_diff = (arrayfun(@imag, target) - arrayfun(@imag, current_fft)).^2;
     output = sum(arrayfun(@sqrt, real_diff + imag_diff));
-end
-
-function output = bin_stationarity(current_bin, previous_bin, preprevious_bin)
-    target_mag = abs(previous_bin);
-    target_arg = angle(2 * previous_bin - preprevious_bin);
-    target = target_mag * exp(1j * target_arg);
-
-    output = sqrt((real(target) - real(current_bin))^2 + (imag(target) - imag(current_bin))^2);
 end
