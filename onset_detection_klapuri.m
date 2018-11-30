@@ -19,10 +19,21 @@ bands(:, 6) = bandpass(audio_in, [6400, 12800], fs);
 amp_envs = upper_envs - lower_envs;
 diff_amp_envs = [diff(amp_envs); zeros(1, 6)];
 diff_amp_envs = arrayfun(@threshold, diff_amp_envs);
-diff_amp_env = prod(diff_amp_envs, 2);
+diff_amp_env = sum(diff_amp_envs, 2);
 
 rel_diff_amp_envs = diff_amp_envs ./ amp_envs;
-rel_diff_amp_env = prod(rel_diff_amp_envs, 2);
+rel_diff_amp_env = sum(rel_diff_amp_envs, 2);
+
+[peak, peak_loc] = findpeaks(rel_diff_amp_env, 'MinPeakDistance', 10000);
+
+subplot(2, 1, 1)
+plot(audio_in)
+subplot(2, 1, 2)
+
+plot(rel_diff_amp_env)
+title("Multiband Differential of the Amplitude - Piano Scale")
+hold
+plot(peak_loc, peak, 'x')
 
 function output = threshold(number)
     if number > 0.00001

@@ -1,6 +1,6 @@
 % Note onset detection using spectral flux
 
-[audio_in, fs] = audioread("Piano_scale.wav");
+[audio_in, fs] = audioread("Sine_single.wav");
 
 fft_size = 2048;
 hop_size = 256;
@@ -20,7 +20,11 @@ end
 
 [peak, peak_loc] = findpeaks(spec_flux, 'MinPeakProminence', 0.005, 'MinPeakDistance', 1000);
 
+subplot(2, 1, 1)
+plot(audio_in)
+subplot(2, 1, 2)
 plot(spec_flux)
+title("Spectral Flux - Single sine tone")
 hold
 plot(peak_loc, peak, 'x')
 
