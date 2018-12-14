@@ -14,9 +14,9 @@ w = waitbar(0, "Finding Note Onsets...");
 
 while cursor + fft_size < length(audio_in)
     waitbar(cursor / length(audio_in), w);
-    preprev_fft = fft(audio_in(cursor - 2 * fft_size:cursor - fft_size-1));
-    prev_fft = fft(audio_in(cursor - fft_size:cursor -1));
-    current_fft = fft(audio_in(cursor:cursor + fft_size -1));
+    preprev_fft = fft(audio_in(cursor - 2 * fft_size:cursor - fft_size - 1));
+    prev_fft = fft(audio_in(cursor - fft_size:cursor - 1));
+    current_fft = fft(audio_in(cursor:cursor + fft_size - 1));
 
     novelty_map(cursor:cursor + hop_size) = novelty_func(current_fft, prev_fft, preprev_fft);
 
