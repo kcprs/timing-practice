@@ -4,7 +4,7 @@
 clear;
 close all;
 
-[audio_in, fs] = audioread("Piano_scale.wav");
+[audio_in, fs] = audioread('test_audio/Piano_scale.wav');
 fft_size = 1024;
 hop_size = 8;
 

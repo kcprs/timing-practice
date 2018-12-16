@@ -1,6 +1,6 @@
 % Note onset detection using spectral flux
 
-[audio_in, fs] = audioread("Sine_single.wav");
+[audio_in, fs] = audioread('test_audio/Sine_single.wav');
 
 fft_size = 2048;
 hop_size = 256;
