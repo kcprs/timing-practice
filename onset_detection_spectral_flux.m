@@ -1,6 +1,6 @@
 % Note onset detection using spectral flux
 
-[audio_in, fs] = audioread('test_audio/Sine_single.wav');
+[audio_in, fs] = audioread('test_audio/Piano_scale.wav');
 
 fft_size = 2048;
 hop_size = 256;
@@ -13,7 +13,8 @@ while cursor + fft_size < length(audio_in)
     frame_fft = fft(audio_in(cursor:cursor + fft_size - 1) .* hann(fft_size));
     fft_difference = abs(frame_fft(1:fft_size / 2 - 1)) - abs(previous_frame_fft(1:fft_size / 2 - 1));
 
-    spec_flux(cursor:cursor + hop_size - 1) = sqrt(sum(fft_difference.^2)) / (fft_size / 2);
+    % spec_flux(cursor:cursor + hop_size - 1) = sqrt(sum(fft_difference.^2)) / (fft_size / 2);
+    spec_flux(cursor:cursor + hop_size -1) = sum(fft_difference);  % Keeping the sign of the difference helps differentiate between note on and note off
     previous_frame_fft = frame_fft;
     cursor = cursor + hop_size;
 end
