@@ -15,7 +15,7 @@ bands(:, 4) = bandpass(audio_in, [1600, 3200], fs);
 bands(:, 5) = bandpass(audio_in, [3200, 6400], fs);
 bands(:, 6) = bandpass(audio_in, [6400, 12800], fs);
 
-[upper_envs, lower_envs] = envelope(bands);
+[upper_envs, lower_envs] = envelope(bands, 4000, 'rms');
 amp_envs = upper_envs - lower_envs;
 diff_amp_envs = [diff(amp_envs); zeros(1, 6)];
 diff_amp_envs = arrayfun(@threshold, diff_amp_envs);
