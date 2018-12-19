@@ -1,5 +1,5 @@
-function [metronome, fs] = generate_metronome(tempo, duration)
-    [m_tick, fs] = audioread('tick.wav');
+function metronome = generate_metronome(tempo, duration, fs)
+    m_tick = audioread('tick.wav');
     m_length = duration * fs;
     t_length = length(m_tick);
     metronome = zeros(m_length, 1);
