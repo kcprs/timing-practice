@@ -1,26 +1,18 @@
-function [metronome, tick_locs] = generate_metronome(tempo, duration, fs)
-    m_tick = audioread('tick.wav');
-    m_length = duration * fs;
-    t_length = length(m_tick);
-    metronome = zeros(m_length, 1);
-
+function [metronome, tick_array] = generate_metronome(tempo, duration, fs)
+    tick = audioread('tick.wav');
     interval = idivide(60 * fs, int32(tempo), 'round');
+    metronome_length = interval * idivide(duration * fs, interval, 'round');
+    tick_array = zeros(metronome_length, 1);
 
-    wb = waitbar(0, 'Generating metronome signal...');
     cursor = 1;
-    tick_locs = ones(idivide(m_length, interval), 1);
-    tick_cursor = 1;
-    while cursor < m_length
-        waitbar(cursor / m_length, wb);
-
-        if cursor + t_length < m_length
-            metronome(cursor:cursor + t_length - 1) = m_tick;
-            tick_locs(tick_cursor) = cursor;
-        end
-
+    wb = waitbar(0, 'Generating metronome signal...');
+    while cursor < metronome_length
+        tick_array(cursor) = 1;
         cursor = cursor + interval;
-        tick_cursor = tick_cursor + 1;
+        waitbar(cursor / metronome_length, wb);
     end
+
+    metronome = conv(tick_array, tick, 'same');
 
     close(wb)
 end

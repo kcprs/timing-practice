@@ -43,9 +43,11 @@ function timing_info = get_timing_info(onset_locs, tick_locs)
     early_num = 0;
     late = 0;
     late_num = 0;
+    sum_all = 0;
 
     for iter = 1:length(onset_locs)
         timing_error = timing_errors(iter);
+        sum_all = sum_all + timing_error.value;
 
         if timing_error.early
             early = early + timing_error.value;
@@ -54,13 +56,15 @@ function timing_info = get_timing_info(onset_locs, tick_locs)
             late = late + timing_error.value;
             late_num = late_num + 1;
         end
-
     end
 
     timing_info.errors = timing_errors;
+    timing_info.average = sum_all / length(timing_errors);
     timing_info.avg_early = early / early_num;
     timing_info.avg_late = late / late_num;
     close(wb);
+    disp('Average:');
+    disp(timing_info.average);
     disp('Average early:');
     disp(timing_info.avg_early);
     disp('Average late:');
