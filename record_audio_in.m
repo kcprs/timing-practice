@@ -1,7 +1,4 @@
-function audio_in = record_audio_in(duration, frameLength, fs)
-    deviceReader = audioDeviceReader(fs, frameLength);
-    setup(deviceReader);
-
+function audio_in = record_audio_in(duration, deviceReader)
     fileWriter = dsp.AudioFileWriter('audio_in.wav', 'FileFormat', 'WAV');
 
     disp('Recording...')
