@@ -4,7 +4,7 @@ function metronome = generate_metronome(tempo, duration, fs)
     t_length = length(m_tick);
     metronome = zeros(m_length, 1);
 
-    interval = 60 / tempo * fs;
+    interval = idivide(60 * fs, int32(tempo), 'round');
 
     wb = waitbar(0, 'Generating metronome signal...');
     cursor = 1;
