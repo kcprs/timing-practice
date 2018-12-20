@@ -12,35 +12,35 @@ frameLength = 256;
 %% Setup system
 deviceReader = audioDeviceReader(fs, frameLength);
 setup(deviceReader);
-% lag = measure_audio_lag(deviceReader);
+% lag = measureAudioLag(deviceReader);
 % lag = 7200;
 
 %% Setup session
-[metronome, tick_array] = generate_metronome(tempo, duration, fs);
+[metronome, tickArray] = generateMetronome(tempo, duration, fs);
 player = audioplayer(metronome, fs);
 
 %% Record
 play(player);
-audio_in = record_audio_in(duration, deviceReader);
+audioIn = recordAudioIn(duration, deviceReader);
 
 %% Process
-audio_in = highpass(audio_in, 50, fs);
-min_tick_dist = get_tick_distance(tempo, fs) / 2;
-onset_locs = detect_onsets(audio_in, min_tick_dist);
-tick_locs = get_tick_locs(tick_array);
-timing_info = get_timing_info(onset_locs, tick_locs);
-lag = round(timing_info.average);
+audioIn = highpass(audioIn, 50, fs);
+minTickDist = getTickDistance(tempo, fs) / 2;
+onsetLocs = detectOnsets(audioIn, minTickDist);
+tickLocs = getTickLocs(tickArray);
+timingInfo = getTimingInfo(onsetLocs, tickLocs);
+lag = round(timingInfo.average);
 metronome = circshift(metronome, lag);
-metronome = metronome(1:length(audio_in));
-tick_array = circshift(tick_array, lag);
-tick_locs = get_tick_locs(tick_array);
+metronome = metronome(1:length(audioIn));
+tickArray = circshift(tickArray, lag);
+tickLocs = getTickLocs(tickArray);
 
 %% Plot
 subplot(2, 1, 1);
 plot(metronome);
 subplot(2, 1, 2);
-plot(audio_in);
+plot(audioIn);
 hold;
-plot(onset_locs, zeros(length(onset_locs)), 'x', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'r');
-plot(tick_locs, zeros(length(tick_locs)), '+', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'g');
+plot(onsetLocs, zeros(length(onsetLocs)), 'x', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'r');
+plot(tickLocs, zeros(length(tickLocs)), '+', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'g');
 hold;
