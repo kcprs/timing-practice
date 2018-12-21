@@ -1,18 +1,13 @@
-function audioIn = recordAudioIn(duration, deviceReader)
-    fileWriter = dsp.AudioFileWriter('audioIn.wav', 'FileFormat', 'WAV');
-
+function audioIn = recordAudioIn(app)
     disp('Recording...')
-    tic;
 
-    while toc < duration
-        audioFromDevice = deviceReader();
-        fileWriter(audioFromDevice);
+    tic;
+    while app.player.isplaying && toc < app.DurationField.Value * 60
+        drawnow();
+        audioFromDevice = app.deviceReader();
+        app.fileWriter(audioFromDevice);
     end
 
     disp('Done recording.');
-
-    release(deviceReader);
-    release(fileWriter);
-
-    audioIn = audioread('audioIn.wav');
+    audioIn = audioread('audioResources/audioIn.wav');
 end

@@ -2,7 +2,44 @@
 
     % Properties that correspond to app components
     properties (Access = public)
-        UIFigure  matlab.ui.Figure
+        UIFigure                   matlab.ui.Figure
+        PracticeSettingsPanel      matlab.ui.container.Panel
+        TempoBPMEditFieldLabel     matlab.ui.control.Label
+        TempoField                 matlab.ui.control.NumericEditField
+        DurationminEditFieldLabel  matlab.ui.control.Label
+        DurationField              matlab.ui.control.NumericEditField
+        StartButton                matlab.ui.control.Button
+        StopButton                 matlab.ui.control.Button
+        TimingPlot                 matlab.ui.control.UIAxes
+    end
+
+    
+    properties (Access = public)
+        player;
+        deviceReader;
+        session;
+        fileWriter;
+        vars;
+    end
+    
+
+    methods (Access = private)
+
+        % Code that executes after component creation
+        function startupFcn(app)
+            app.vars.fs = 44100;
+            app.vars.frameLength = 256;
+        end
+
+        % Button pushed function: StartButton
+        function StartButtonPushed(app, event)
+            runPracticeSession(app);
+        end
+
+        % Button pushed function: StopButton
+        function StopButtonPushed(app, event)
+            stopPracticeSession(app);
+        end
     end
 
     % App initialization and construction
@@ -13,8 +50,58 @@
 
             % Create UIFigure
             app.UIFigure = uifigure;
-            app.UIFigure.Position = [100 100 640 480];
+            app.UIFigure.Position = [100 100 1163 750];
             app.UIFigure.Name = 'UI Figure';
+
+            % Create PracticeSettingsPanel
+            app.PracticeSettingsPanel = uipanel(app.UIFigure);
+            app.PracticeSettingsPanel.Title = 'Practice Settings';
+            app.PracticeSettingsPanel.Position = [30 593 243 128];
+
+            % Create TempoBPMEditFieldLabel
+            app.TempoBPMEditFieldLabel = uilabel(app.PracticeSettingsPanel);
+            app.TempoBPMEditFieldLabel.HorizontalAlignment = 'right';
+            app.TempoBPMEditFieldLabel.Position = [24 65 79 22];
+            app.TempoBPMEditFieldLabel.Text = 'Tempo (BPM)';
+
+            % Create TempoField
+            app.TempoField = uieditfield(app.PracticeSettingsPanel, 'numeric');
+            app.TempoField.Limits = [40 320];
+            app.TempoField.RoundFractionalValues = 'on';
+            app.TempoField.Position = [118 65 103 22];
+            app.TempoField.Value = 120;
+
+            % Create DurationminEditFieldLabel
+            app.DurationminEditFieldLabel = uilabel(app.PracticeSettingsPanel);
+            app.DurationminEditFieldLabel.HorizontalAlignment = 'right';
+            app.DurationminEditFieldLabel.Position = [24 23 82 22];
+            app.DurationminEditFieldLabel.Text = 'Duration (min)';
+
+            % Create DurationField
+            app.DurationField = uieditfield(app.PracticeSettingsPanel, 'numeric');
+            app.DurationField.LowerLimitInclusive = 'off';
+            app.DurationField.Limits = [0 60];
+            app.DurationField.Position = [121 23 100 22];
+            app.DurationField.Value = 0.1;
+
+            % Create StartButton
+            app.StartButton = uibutton(app.UIFigure, 'push');
+            app.StartButton.ButtonPushedFcn = createCallbackFcn(app, @StartButtonPushed, true);
+            app.StartButton.Position = [102 542 100 22];
+            app.StartButton.Text = 'Start';
+
+            % Create StopButton
+            app.StopButton = uibutton(app.UIFigure, 'push');
+            app.StopButton.ButtonPushedFcn = createCallbackFcn(app, @StopButtonPushed, true);
+            app.StopButton.Position = [103 507 100 22];
+            app.StopButton.Text = 'Stop';
+
+            % Create TimingPlot
+            app.TimingPlot = uiaxes(app.UIFigure);
+            title(app.TimingPlot, 'Title')
+            xlabel(app.TimingPlot, 'X')
+            ylabel(app.TimingPlot, 'Y')
+            app.TimingPlot.Position = [29 45 1108 432];
         end
     end
 
@@ -28,6 +115,9 @@
 
             % Register the app with App Designer
             registerApp(app, app.UIFigure)
+
+            % Execute the startup function
+            runStartupFcn(app, @startupFcn)
 
             if nargout == 0
                 clear app
