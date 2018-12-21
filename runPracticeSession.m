@@ -19,4 +19,6 @@ function runPracticeSession(app)
     %% TMP
     analyse(app.session, true);
     plotSession(app.session, app.TimingPlot);
+    app.vars.playhead = 0;
+    app.vars.playheadPos = 1;
 end

@@ -1,6 +1,6 @@
 function audioIn = recordAudioIn(app)
     tic;
-    while app.player.isplaying && toc < app.DurationField.Value * 60
+    while app.player.isplaying && toc < app.DurationField.Value * 60 + 1
         drawnow();
         audioFromDevice = app.deviceReader();
         app.fileWriter(audioFromDevice);
