@@ -1,11 +1,10 @@
 function runPracticeSession(app)
     %% Setup player
-    app.session = PracticeSession(app.TempoField.Value, app.DurationField.Value * 60, app.vars.fs);
-    app.player = audioplayer(app.session.metronome.audio, app.vars.fs);
-    app.player.StopFcn = @(~, ~) disp('Player stop');
+    app.session = PracticeSession(app.TempoField.Value, app.DurationField.Value * 60, str2double(app.SampleRateDropDown.Value));
+    app.player = audioplayer(app.session.metronome.audio, str2double(app.SampleRateDropDown.Value));
 
     %% Setup recorder and file writer
-    app.deviceReader = audioDeviceReader(app.vars.fs, app.vars.frameLength);
+    app.deviceReader = audioDeviceReader(str2double(app.SampleRateDropDown.Value), str2double(app.BufferSizeDropDown.Value));
     setup(app.deviceReader);
     app.fileWriter = dsp.AudioFileWriter('audioResources/audioIn.wav', 'FileFormat', 'WAV');
 

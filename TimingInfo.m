@@ -19,6 +19,7 @@ classdef TimingInfo < handle
             self.errors = TimingError.empty(0, length(self.onsetLocs));
 
             tickCursor = 1;
+            prevTick = 0;
             wb = waitbar(0, 'Analysing timing...');
 
             for iter = 1:length(self.onsetLocs)
@@ -63,12 +64,6 @@ classdef TimingInfo < handle
             self.avgEarly = early / earlyNum;
             self.avgLate = late / lateNum;
             close(wb);
-            disp('Average:');
-            disp(self.average);
-            disp('Average early:');
-            disp(self.avgEarly);
-            disp('Average late:');
-            disp(self.avgLate);
 
             if subtractAverageLag
                 averageLag = round(self.average);
@@ -84,8 +79,8 @@ classdef TimingInfo < handle
     methods (Static, Access = private)
 
         function onsetLocs = detectOnsets(audioIn, minPeakDist)
-            fftSize = 64; % Keep this low to maintain high accuracy
-            hopSize = 64;
+            fftSize = 128; % Keep this low to maintain high accuracy
+            hopSize = 128;
 
             cursor = 1;
             novelty = zeros(length(audioIn), 1);

@@ -11,6 +11,11 @@
         StartButton                matlab.ui.control.Button
         StopButton                 matlab.ui.control.Button
         TimingPlot                 matlab.ui.control.UIAxes
+        SystemSettingsPanel        matlab.ui.container.Panel
+        BufferSizeDropDownLabel    matlab.ui.control.Label
+        BufferSizeDropDown         matlab.ui.control.DropDown
+        SampleRateDropDownLabel    matlab.ui.control.Label
+        SampleRateDropDown         matlab.ui.control.DropDown
     end
 
     
@@ -24,12 +29,6 @@
     
 
     methods (Access = private)
-
-        % Code that executes after component creation
-        function startupFcn(app)
-            app.vars.fs = 44100;
-            app.vars.frameLength = 256;
-        end
 
         % Button pushed function: StartButton
         function StartButtonPushed(app, event)
@@ -56,7 +55,7 @@
             % Create PracticeSettingsPanel
             app.PracticeSettingsPanel = uipanel(app.UIFigure);
             app.PracticeSettingsPanel.Title = 'Practice Settings';
-            app.PracticeSettingsPanel.Position = [30 593 243 128];
+            app.PracticeSettingsPanel.Position = [32 593 243 128];
 
             % Create TempoBPMEditFieldLabel
             app.TempoBPMEditFieldLabel = uilabel(app.PracticeSettingsPanel);
@@ -68,7 +67,7 @@
             app.TempoField = uieditfield(app.PracticeSettingsPanel, 'numeric');
             app.TempoField.Limits = [40 320];
             app.TempoField.RoundFractionalValues = 'on';
-            app.TempoField.Position = [118 65 103 22];
+            app.TempoField.Position = [121 65 100 22];
             app.TempoField.Value = 120;
 
             % Create DurationminEditFieldLabel
@@ -102,6 +101,35 @@
             xlabel(app.TimingPlot, 'X')
             ylabel(app.TimingPlot, 'Y')
             app.TimingPlot.Position = [29 45 1108 432];
+
+            % Create SystemSettingsPanel
+            app.SystemSettingsPanel = uipanel(app.UIFigure);
+            app.SystemSettingsPanel.Title = 'System Settings';
+            app.SystemSettingsPanel.Position = [359 593 243 128];
+
+            % Create SampleRateDropDownLabel
+            app.SampleRateDropDownLabel = uilabel(app.SystemSettingsPanel);
+            app.SampleRateDropDownLabel.HorizontalAlignment = 'right';
+            app.SampleRateDropDownLabel.Position = [24 65 75 22];
+            app.SampleRateDropDownLabel.Text = 'Sample Rate';
+
+            % Create SampleRateDropDown
+            app.SampleRateDropDown = uidropdown(app.SystemSettingsPanel);
+            app.SampleRateDropDown.Items = {'44100', '48000'};
+            app.SampleRateDropDown.Position = [120 65 101 22];
+            app.SampleRateDropDown.Value = '44100';
+
+            % Create BufferSizeDropDownLabel
+            app.BufferSizeDropDownLabel = uilabel(app.SystemSettingsPanel);
+            app.BufferSizeDropDownLabel.HorizontalAlignment = 'right';
+            app.BufferSizeDropDownLabel.Position = [24 23 64 22];
+            app.BufferSizeDropDownLabel.Text = 'Buffer Size';
+
+            % Create BufferSizeDropDown
+            app.BufferSizeDropDown = uidropdown(app.SystemSettingsPanel);
+            app.BufferSizeDropDown.Items = {'128', '256', '512'};
+            app.BufferSizeDropDown.Position = [120 23 101 22];
+            app.BufferSizeDropDown.Value = '256';
         end
     end
 
@@ -115,9 +143,6 @@
 
             % Register the app with App Designer
             registerApp(app, app.UIFigure)
-
-            % Execute the startup function
-            runStartupFcn(app, @startupFcn)
 
             if nargout == 0
                 clear app

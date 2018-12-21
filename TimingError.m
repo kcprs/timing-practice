@@ -14,7 +14,7 @@ classdef TimingError < handle
             self.prevTick = prevTick;
             self.nextTick = nextTick;
 
-            if onset - prevTick < nextTick - onset || nextTick == 0
+            if (onset - prevTick < nextTick - onset || nextTick == 0) && prevTick ~= 0
                 self.closestTick = prevTick;
                 self.isEarly = false;
             else
