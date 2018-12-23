@@ -1,5 +1,4 @@
 function movePlayheadTo(direction, loc_type, app)
-
     if strcmp(loc_type, 'onset')
         locs = app.session.timingInfo.onsetLocs;
     elseif strcmp(loc_type, 'tick')

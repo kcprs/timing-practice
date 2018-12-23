@@ -48,7 +48,7 @@
 
         % Value changed function: PlayheadSlider
         function PlayheadSliderValueChanged(app, event)
-            movePlayhead(app, app.PlayheadSlider.Value * length(app.session.audioIn));
+            movePlayhead(app, app.PlayheadSlider.Value * app.session.fs * app.TimingPlot.XLim(2));
         end
 
         % Button pushed function: NextOnsetButton
