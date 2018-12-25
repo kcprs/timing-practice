@@ -22,6 +22,7 @@
         PreviousOnsetButton        matlab.ui.control.Button
         PreviousTickButton         matlab.ui.control.Button
         NextTickButton             matlab.ui.control.Button
+        MeasureAudioLagButton      matlab.ui.control.Button
     end
 
     
@@ -30,7 +31,9 @@
         deviceReader;
         session;
         fileWriter;
-        vars;
+        audioLag;
+        playheadLoc;
+        playheadPlot;
     end
     
 
@@ -69,6 +72,11 @@
         % Button pushed function: NextTickButton
         function NextTickButtonPushed(app, event)
             movePlayheadTo('next', 'tick', app);
+        end
+
+        % Button pushed function: MeasureAudioLagButton
+        function MeasureAudioLagButtonPushed(app, event)
+            measureAudioLag(app);
         end
     end
 
@@ -199,6 +207,12 @@
             app.NextTickButton.ButtonPushedFcn = createCallbackFcn(app, @NextTickButtonPushed, true);
             app.NextTickButton.Position = [891 552 100 22];
             app.NextTickButton.Text = 'Next Tick';
+
+            % Create MeasureAudioLagButton
+            app.MeasureAudioLagButton = uibutton(app.UIFigure, 'push');
+            app.MeasureAudioLagButton.ButtonPushedFcn = createCallbackFcn(app, @MeasureAudioLagButtonPushed, true);
+            app.MeasureAudioLagButton.Position = [400 531 120 22];
+            app.MeasureAudioLagButton.Text = 'Measure Audio Lag';
         end
     end
 

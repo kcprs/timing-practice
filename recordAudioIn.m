@@ -6,5 +6,5 @@ function audioIn = recordAudioIn(app)
         app.fileWriter(audioFromDevice);
     end
 
-    audioIn = audioread('audioResources/audioIn.wav');
+    audioIn = highpass(audioread('audioResources/audioIn.wav'), 50, app.deviceReader.SampleRate);
 end

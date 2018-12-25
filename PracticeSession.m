@@ -19,7 +19,6 @@ classdef PracticeSession < handle
         end
 
         function analyse(self, subtractAverageLag)
-            self.audioIn = highpass(self.audioIn, 50, self.fs);
             self.timingInfo = TimingInfo(self.audioIn, self.metronome, subtractAverageLag);
         end
 
@@ -30,9 +29,10 @@ classdef PracticeSession < handle
             onsetTimes = self.timingInfo.onsetLocs / self.fs;
             plot(ax, onsetTimes, zeros(length(onsetTimes)), 'x', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'r');
             tickTimes = self.timingInfo.tickLocs / self.fs;
-            plot(ax,tickTimes, zeros(length(tickTimes)), '+', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'g');
+            plot(ax, tickTimes, zeros(length(tickTimes)), '+', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'g');
             hold(ax, 'off');
         end
+
     end
 
 end
