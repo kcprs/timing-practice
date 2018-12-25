@@ -39,6 +39,11 @@
 
     methods (Access = private)
 
+        % Code that executes after component creation
+        function startupFcn(app)
+            initialise(app);
+        end
+
         % Button pushed function: StartButton
         function StartButtonPushed(app, event)
             runPracticeSession(app);
@@ -226,6 +231,9 @@
 
             % Register the app with App Designer
             registerApp(app, app.UIFigure)
+
+            % Execute the startup function
+            runStartupFcn(app, @startupFcn)
 
             if nargout == 0
                 clear app

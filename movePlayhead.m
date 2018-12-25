@@ -4,7 +4,7 @@ function movePlayhead(app, samplePos)
     app.PlayheadSlider.Value = samplePos / (app.session.fs * app.TimingPlot.XLim(2));
 
     if app.playheadPlot ~= 0
-        delete(app.vars.playhead);
+        delete(app.playheadPlot);
     end
 
     hold(app.TimingPlot, 'on');

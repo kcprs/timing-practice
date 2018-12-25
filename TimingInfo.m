@@ -11,7 +11,7 @@ classdef TimingInfo < handle
 
     methods
 
-        function self = TimingInfo(audioIn, metronome, subtractAverageLag)
+        function self = TimingInfo(audioIn, metronome, lagCompensation)
             minTickDistance = metronome.getTickDistance() / 2;
             self.onsetLocs = TimingInfo.detectOnsets(audioIn, minTickDistance);
             self.tickLocs = metronome.getTickLocs();
@@ -65,9 +65,11 @@ classdef TimingInfo < handle
             self.avgLate = late / lateNum;
             close(wb);
 
-            if subtractAverageLag
+            if lagCompensation == -1
                 averageLag = round(self.average);
                 metronome.ticks = circshift(metronome.ticks, averageLag);
+            else
+                metronome.ticks = circshift(metronome.ticks, lagCompensation);
             end
 
             self.tickLocs = metronome.getTickLocs();

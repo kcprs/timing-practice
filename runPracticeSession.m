@@ -17,8 +17,6 @@ function runPracticeSession(app)
     release(app.fileWriter);
 
     %% TMP
-    analyse(app.session, true);
+    analyse(app.session, app.audioLag);
     plotSession(app.session, app.TimingPlot);
-    app.playheadPlot = 0;
-    app.playheadLoc = 1;
 end

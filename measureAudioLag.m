@@ -1,8 +1,8 @@
 function measureAudioLag(app)
     %% Setup chirp signal
-    duration = 0.2;
+    duration = 0.5;
     fs = str2double(app.SampleRateDropDown.Value);
-    time = 0:1 / (fs * duration):1;
+    time = 0:1 / fs:duration;
     chirpSig = [zeros(1, fs), chirp(time, 10000, duration, 100, 'logarithmic'), zeros(1, fs)];
 
     %% Setup player
@@ -24,7 +24,7 @@ function measureAudioLag(app)
     %% Find lag through cross-correlation
     xCorr = xcorr(audioIn, chirpSig);
     xCorrClipped = xCorr(ceil(length(xCorr) / 2):end);
-    
+
     [~, lag] = max(xCorrClipped);
     lag = lag - 1;
     app.audioLag = lag;

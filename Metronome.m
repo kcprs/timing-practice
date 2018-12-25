@@ -1,4 +1,5 @@
 classdef Metronome < handle
+
     properties
         tempo;
         fs;
@@ -7,6 +8,7 @@ classdef Metronome < handle
     end
 
     methods
+
         function self = Metronome(tempo, duration, fs)
             self.tempo = tempo;
             self.fs = fs;
@@ -24,17 +26,36 @@ classdef Metronome < handle
                 waitbar(cursor / metronomeLength, wb);
             end
 
+            tick = [zeros(length(tick), 1); tick];
             self.audio = conv(self.ticks, tick, 'same');
 
             close(wb)
         end
 
         function tickLocs = getTickLocs(self)
-            [~, tickLocs] = findpeaks(self.ticks);
+            tickLocs = zeros(length(self.ticks), 1);
+            cursor = 1;
+
+            for iter = 1:length(self.ticks)
+
+                if self.ticks(iter) == 1
+                    tickLocs(cursor) = iter;
+                    cursor = cursor + 1;
+                end
+
+            end
+
+            tickLocs = tickLocs(1:cursor - 1);
+            plot(self.audio);
+            hold('on');
+            plot(tickLocs, ones(length(tickLocs)), 'x');
+            hold('off');
         end
 
         function tickDist = getTickDistance(self)
             tickDist = idivide(60 * self.fs, int32(self.tempo), 'round');
         end
+
     end
+
 end
