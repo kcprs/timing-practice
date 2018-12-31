@@ -31,7 +31,6 @@
         deviceReader;
         session;
         fileWriter;
-        audioLag;
         playheadLoc;
         playheadPlot;
     end
@@ -144,6 +143,7 @@
             title(app.TimingPlot, 'Title')
             xlabel(app.TimingPlot, 'X')
             ylabel(app.TimingPlot, 'Y')
+            app.TimingPlot.PlotBoxAspectRatio = [1 0.355325164938737 0.355325164938737];
             app.TimingPlot.Position = [29 67 1108 432];
 
             % Create SystemSettingsPanel

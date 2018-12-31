@@ -15,19 +15,22 @@ function measureAudioLag(app)
 
     %% Play and record
     play(app.player);
-    audioIn = recordAudioIn(app);
+    recordAudioIn(app, duration * fs);
 
     %% Release resources
     release(app.deviceReader);
     release(app.fileWriter);
 
     %% Find lag through cross-correlation
-    xCorr = xcorr(audioIn, chirpSig);
+    xCorr = xcorr(app.session.audioIn, chirpSig);
     xCorrClipped = xCorr(ceil(length(xCorr) / 2):end);
 
     [~, lag] = max(xCorrClipped);
     lag = lag - 1;
-    app.audioLag = lag;
+    app.session.timingInfo.audioLag = lag;
+
+    disp('Audio lag:');
+    disp(lag);
 
     % subplot(3, 1, 3);
     % plot(xCorrClipped);
@@ -40,7 +43,7 @@ function measureAudioLag(app)
     % ax = gca;
     % ax.XLim = xl;
     % subplot(3, 1, 2)
-    % plot(audioIn);
+    % plot(app.session.audioIn);
     % ax = gca;
     % ax.XLim = xl;
 end

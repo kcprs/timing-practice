@@ -1,6 +1,6 @@
 function runPracticeSession(app)
     %% Setup player
-    app.session = PracticeSession(app.TempoField.Value, app.DurationField.Value * 60, str2double(app.SampleRateDropDown.Value));
+    update(app.session, app);
     app.player = audioplayer(app.session.metronome.audio, str2double(app.SampleRateDropDown.Value));
 
     %% Setup recorder and file writer
@@ -10,13 +10,13 @@ function runPracticeSession(app)
 
     %% Play and record
     play(app.player);
-    app.session.audioIn = recordAudioIn(app);
+    recordAudioIn(app, length(app.session.metronome.audio));
+    app.session.runExtAnalysis()
 
     %% Release resources
     release(app.deviceReader);
     release(app.fileWriter);
 
     %% TMP
-    analyse(app.session, app.audioLag);
     plotSession(app.session, app.TimingPlot);
 end

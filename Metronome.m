@@ -46,10 +46,11 @@ classdef Metronome < handle
             end
 
             tickLocs = tickLocs(1:cursor - 1);
-            plot(self.audio);
-            hold('on');
-            plot(tickLocs, ones(length(tickLocs)), 'x');
-            hold('off');
+            
+            % plot(self.audio);
+            % hold('on');
+            % plot(tickLocs, ones(length(tickLocs)), 'x');
+            % hold('off');
         end
 
         function tickDist = getTickDistance(self)

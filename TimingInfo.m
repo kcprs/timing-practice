@@ -2,20 +2,62 @@ classdef TimingInfo < handle
 
     properties
         onsetLocs;
+
         tickLocs;
         errors;
         average;
         avgEarly;
         avgLate;
+        detBufSize;
+        detBuf;
+        detBufLoc;
+        onsetCursor;
+        fftSize;
+        hopSize;
+        minOnsetDist;
+        audioLag;
     end
 
     methods
 
-        function self = TimingInfo(audioIn, metronome, lagCompensation)
-            minTickDistance = metronome.getTickDistance() / 2;
-            self.onsetLocs = TimingInfo.detectOnsets(audioIn, minTickDistance);
-            self.tickLocs = metronome.getTickLocs();
+        function self = TimingInfo()
+            self.fftSize = 128; % Keep this low to maintain high accuracy
+            self.hopSize = 128;
+            self.audioLag = 0;
+        end
 
+        function prepare(self, duration, metronome)
+            numOnsets = duration / 60 * metronome.tempo + duration; % Predicted num of onsets
+            self.onsetLocs = zeros(numOnsets, 1);
+            self.errors = TimingError.empty(0, numOnsets);
+            self.tickLocs = metronome.getTickLocs();
+            self.onsetCursor = 1;
+            self.detBufLoc = 1;
+            self.detBufSize = metronome.getTickDistance();
+            self.minOnsetDist = self.detBufSize / 2;
+            self.detBuf = CircularBuffer(self.detBufSize);
+        end
+
+        function addFrame(self, frame, position)
+
+            if self.detBuf.add(frame)
+                self.analyseBuffer();
+                self.detBufLoc = position;
+            end
+
+        end
+
+        function cleanUpOnsets(self)
+            cursor = 1;
+
+            while cursor <= length(self.onsetLocs) && self.onsetLocs(cursor) ~= 0
+                cursor = cursor + 1;
+            end
+
+            self.onsetLocs = self.onsetLocs(1:cursor - 1);
+        end
+
+        function runExtAnalysis(self)
             self.errors = TimingError.empty(0, length(self.onsetLocs));
 
             tickCursor = 1;
@@ -64,55 +106,40 @@ classdef TimingInfo < handle
             self.avgEarly = early / earlyNum;
             self.avgLate = late / lateNum;
             close(wb);
-
-            if lagCompensation == -1
-                averageLag = round(self.average);
-                metronome.ticks = circshift(metronome.ticks, averageLag);
-            else
-                metronome.ticks = circshift(metronome.ticks, lagCompensation);
-            end
-
-            self.tickLocs = metronome.getTickLocs();
-
         end
 
     end
 
-    methods (Static, Access = private)
+    methods (Access = private)
 
-        function onsetLocs = detectOnsets(audioIn, minPeakDist)
-            fftSize = 128; % Keep this low to maintain high accuracy
-            hopSize = 128;
-
+        function analyseBuffer(self)
             cursor = 1;
-            novelty = zeros(length(audioIn), 1);
-            previousFrameFFT = fft(audioIn(1:fftSize) .* hann(fftSize));
+            novelty = zeros(self.detBufSize, 1); % TODO: Store one value per FFT frame
+            previousFrameFFT = fft(self.detBuf.prepreviousData(end - self.fftSize + 1:end) .* hann(self.fftSize));
 
-            wb = waitbar(0, 'Detecting onsets...');
+            while cursor + self.fftSize <= self.detBufSize
+                frameFFT = fft(self.detBuf.previousData(cursor:cursor + self.fftSize - 1) .* hann(self.fftSize));
+                fftDifference = abs(frameFFT(1:self.fftSize / 2 - 1)) - abs(previousFrameFFT(1:self.fftSize / 2 - 1));
 
-            while cursor + fftSize < length(audioIn)
-                waitbar(cursor / length(audioIn) - 0.2, wb);
-                frameFFT = fft(audioIn(cursor:cursor + fftSize - 1) .* hann(fftSize));
-                fftDifference = abs(frameFFT(1:fftSize / 2 - 1)) - abs(previousFrameFFT(1:fftSize / 2 - 1));
-
-                novelty(cursor:cursor + hopSize - 1) = sum(fftDifference); % Keeping the sign of the difference helps differentiate between note on and note off
+                novelty(cursor:cursor + self.hopSize - 1) = sum(fftDifference); % Keeping the sign of the difference helps differentiate between note on and note off
                 previousFrameFFT = frameFFT;
-                cursor = cursor + hopSize;
+                cursor = cursor + self.hopSize;
             end
 
-            waitbar(0.9, wb);
+            numRemaining = self.detBufSize - cursor;
+            padLen = self.fftSize - numRemaining;
+            frameFFT = fft([self.detBuf.previousData(cursor:end); zeros(padLen, 1)]);
+            fftDifference = abs(frameFFT(1:self.fftSize / 2 - 1)) - abs(previousFrameFFT(1:self.fftSize / 2 - 1));
+            novelty(cursor:end) = sum(fftDifference);
 
             maxVal = max(novelty);
             novelty = novelty / maxVal;
-            [~, onsetLocs] = findpeaks(novelty, 'MinPeakProminence', 0.5, 'MinPeakDistance', minPeakDist);
+            [~, newOnsetLocs] = findpeaks(novelty, 'MinPeakProminence', 0.5, 'MinPeakDistance', self.minOnsetDist);
 
-            close(wb);
-
-            % plot(audioIn);
-            % hold;
-            % plot(novelty);
-            % plot(onsetLocs, onsetPeaks, 'x');
-            % hold;
+            numOnsets = length(newOnsetLocs);
+            newOnsetLocs = newOnsetLocs + self.detBufLoc - self.audioLag;
+            self.onsetLocs(self.onsetCursor:self.onsetCursor + numOnsets - 1) = newOnsetLocs;
+            self.onsetCursor = self.onsetCursor + numOnsets;
         end
 
     end
