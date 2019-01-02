@@ -17,7 +17,7 @@ function movePlayheadTo(direction, loc_type, app)
         error('Unknown direction')
     end
 
-    while cursor + dir_factor <= length(locs) && cursor + dir_factor > 1 && locs(cursor) * dir_factor <= app.playheadLoc * dir_factor
+    while cursor + dir_factor <= length(locs) && cursor + dir_factor >= 1 && locs(cursor) * dir_factor <= app.playheadLoc * dir_factor
         cursor = cursor + dir_factor;
     end
 

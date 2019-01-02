@@ -23,14 +23,17 @@
         PreviousTickButton         matlab.ui.control.Button
         NextTickButton             matlab.ui.control.Button
         MeasureAudioLagButton      matlab.ui.control.Button
+        ResultsTextAreaLabel       matlab.ui.control.Label
+        ResultsTextArea            matlab.ui.control.TextArea
     end
 
     
     properties (Access = public)
+        session;
         player;
         deviceReader;
-        session;
-        fileWriter;
+%         fileWriter;
+        
         playheadLoc;
         playheadPlot;
     end
@@ -45,12 +48,12 @@
 
         % Button pushed function: StartButton
         function StartButtonPushed(app, event)
-            runPracticeSession(app);
+            app.session.runPractice(app);
         end
 
         % Button pushed function: StopButton
         function StopButtonPushed(app, event)
-            stopPracticeSession(app);
+            app.session.stopPractice(app);
         end
 
         % Value changed function: PlayheadSlider
@@ -80,7 +83,7 @@
 
         % Button pushed function: MeasureAudioLagButton
         function MeasureAudioLagButtonPushed(app, event)
-            measureAudioLag(app);
+            app.session.measureAudioLag(app);
         end
     end
 
@@ -218,6 +221,16 @@
             app.MeasureAudioLagButton.ButtonPushedFcn = createCallbackFcn(app, @MeasureAudioLagButtonPushed, true);
             app.MeasureAudioLagButton.Position = [400 531 120 22];
             app.MeasureAudioLagButton.Text = 'Measure Audio Lag';
+
+            % Create ResultsTextAreaLabel
+            app.ResultsTextAreaLabel = uilabel(app.UIFigure);
+            app.ResultsTextAreaLabel.HorizontalAlignment = 'right';
+            app.ResultsTextAreaLabel.Position = [778 673 46 22];
+            app.ResultsTextAreaLabel.Text = 'Results';
+
+            % Create ResultsTextArea
+            app.ResultsTextArea = uitextarea(app.UIFigure);
+            app.ResultsTextArea.Position = [839 637 150 60];
         end
     end
 

@@ -1,35 +1,35 @@
 classdef Metronome < handle
 
     properties
-        tempo;
-        fs;
+        session;
         audio;
         ticks;
     end
 
     methods
 
-        function self = Metronome(tempo, duration, fs)
-            self.tempo = tempo;
-            self.fs = fs;
+        function self = Metronome(session)
+            self.session = session;
             tick = audioread('audioResources/tick.wav');
-            interval = idivide(60 * fs, int32(tempo), 'round');
-            metronomeLength = interval * idivide(duration * fs, interval, 'round');
+            interval = idivide(60 * self.session.fs, int32(self.session.tempo), 'round');
+            metronomeLength = interval * idivide(self.session.duration * self.session.fs, interval, 'round');
             self.ticks = zeros(metronomeLength, 1);
 
             cursor = 1;
-            wb = waitbar(0, 'Generating metronome signal...');
+            multiWaitbar('Generating metronome signal...');
 
             while cursor < metronomeLength
                 self.ticks(cursor) = 1;
                 cursor = cursor + interval;
-                waitbar(cursor / metronomeLength, wb);
+                progress = double(cursor) / double(metronomeLength);
+                multiWaitbar('Generating metronome signal...', progress);
             end
 
+            self.ticks = circshift(self.ticks, floor(interval / 2));
             tick = [zeros(length(tick), 1); tick];
             self.audio = conv(self.ticks, tick, 'same');
 
-            close(wb)
+            multiWaitbar('Generating metronome signal...', 'Close');
         end
 
         function tickLocs = getTickLocs(self)
@@ -46,7 +46,7 @@ classdef Metronome < handle
             end
 
             tickLocs = tickLocs(1:cursor - 1);
-            
+
             % plot(self.audio);
             % hold('on');
             % plot(tickLocs, ones(length(tickLocs)), 'x');
@@ -54,7 +54,7 @@ classdef Metronome < handle
         end
 
         function tickDist = getTickDistance(self)
-            tickDist = idivide(60 * self.fs, int32(self.tempo), 'round');
+            tickDist = idivide(60 * self.session.fs, int32(self.session.tempo), 'round');
         end
 
     end

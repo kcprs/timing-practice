@@ -5,9 +5,6 @@ classdef CircularBuffer < handle
         previousData;
         prepreviousData;
         bufferSize;
-    end
-
-    properties (Access = private)
         cursor;
     end
 
@@ -32,7 +29,7 @@ classdef CircularBuffer < handle
                 self.previousData = self.data;
                 self.data = zeros(self.bufferSize, 1);
                 self.data(1:numRemaining) = newData(numToBufferEnd + 1:end);
-                self.cursor = 1;
+                self.cursor = numRemaining + 1;
                 filled = true;
             else
                 self.data(self.cursor:self.cursor + dataLen - 1) = newData;
