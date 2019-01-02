@@ -19,6 +19,7 @@ classdef TimingInfo < handle
         average;
         avgEarly;
         avgLate;
+        timingTolerance;
     end
 
     methods
@@ -43,6 +44,7 @@ classdef TimingInfo < handle
             self.errors = TimingError.empty(0, numOnsets);
             self.errorCursor = 1;
             self.minOnsetDist = self.detBufSize / 2;
+            self.timingTolerance = session.fs / 100;
         end
 
         function addFrame(self, frame)
@@ -81,10 +83,10 @@ classdef TimingInfo < handle
                 timingError = self.errors(iter);
                 sumAll = sumAll + timingError.value;
 
-                if timingError.isEarly
+                if strcmp(timingError.timing, 'early')
                     early = early + timingError.value;
                     earlyNum = earlyNum + 1;
-                else
+                elseif strcmp(timingError.timing, 'late')
                     late = late + timingError.value;
                     lateNum = lateNum + 1;
                 end
@@ -131,14 +133,19 @@ classdef TimingInfo < handle
             numOnsets = length(newOnsetLocs);
 
             if numOnsets > 0
-                newOnsetLocs = newOnsetLocs + self.detBufLoc - 1 - self.audioLag;
+                newOnsetLocs = int64(newOnsetLocs) + int64(self.detBufLoc) - 1 - int64(self.audioLag);
                 self.onsetLocs(self.onsetCursor:self.onsetCursor + numOnsets - 1) = newOnsetLocs;
                 self.onsetCursor = self.onsetCursor + numOnsets;
             end
         end
 
         function analyseErrors(self, newOnsetLocs)
-            tick = 0;
+            if self.tickCursor < 1
+                tick = 0;
+                self.tickCursor = 0;
+            else
+                tick = self.tickLocs(self.tickCursor);
+            end
             newOnsetCursor = 1;
 
             while tick < self.detBufLoc + self.detBufSize
@@ -151,7 +158,7 @@ classdef TimingInfo < handle
 
                 while newOnsetCursor <= length(newOnsetLocs) && (newOnsetLocs(newOnsetCursor) <= nextTick || nextTick == 0)
                     onset = newOnsetLocs(newOnsetCursor);
-                    self.errors(self.errorCursor) = TimingError(onset, tick, nextTick);
+                    self.errors(self.errorCursor) = TimingError(onset, tick, nextTick, self.timingTolerance);
                     newOnsetCursor = newOnsetCursor + 1;
                     self.errorCursor = self.errorCursor + 1;
                 end
@@ -163,6 +170,8 @@ classdef TimingInfo < handle
                 self.tickCursor = self.tickCursor + 1;
                 tick = self.tickLocs(self.tickCursor);
             end
+
+            self.tickCursor = self.tickCursor - 1;
         end
 
         function analyseBuffer(self)

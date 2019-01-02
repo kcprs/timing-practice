@@ -1,6 +1,7 @@
 classdef PracticeSession < handle
 
     properties
+        app;
         tempo;
         duration;
         fs;
@@ -12,7 +13,8 @@ classdef PracticeSession < handle
 
     methods
 
-        function self = PracticeSession()
+        function self = PracticeSession(app)
+            self.app = app;
             self.timingInfo = TimingInfo();
         end
 
@@ -24,12 +26,37 @@ classdef PracticeSession < handle
             self.audioIn = zeros(self.duration * self.fs + 2 * self.fs, 1);
             self.audioCursor = 1;
             self.timingInfo.prepare(self);
+
+            self.app.EarlyLamp.Color = Colours.grey;
+            self.app.OKLamp.Color = Colours.grey;
+            self.app.LateLamp.Color = Colours.grey;
         end
 
         function addFrame(self, frame)
             self.audioIn(self.audioCursor:self.audioCursor + length(frame) - 1) = frame;
             self.audioCursor = self.audioCursor + length(frame);
             self.timingInfo.addFrame(frame);
+
+            if ~isempty(self.timingInfo.errors)
+                recentError = self.timingInfo.errors(self.timingInfo.errorCursor - 1);
+
+                if strcmp(recentError.timing, 'early')
+                    self.app.EarlyLamp.Color = Colours.red;
+                    self.app.OKLamp.Color = Colours.grey;
+                    self.app.LateLamp.Color = Colours.grey;
+                elseif strcmp(recentError.timing, 'late')
+                    self.app.EarlyLamp.Color = Colours.grey;
+                    self.app.OKLamp.Color = Colours.grey;
+                    self.app.LateLamp.Color = Colours.red;
+                else
+                    self.app.EarlyLamp.Color = Colours.grey;
+                    self.app.OKLamp.Color = Colours.green;
+                    self.app.LateLamp.Color = Colours.grey;
+                end
+
+                self.app.TimingGauge.Value = 0.05 * double(recentError.value) / self.timingInfo.timingTolerance;
+            end
+
         end
 
         function runPractice(self, app)
@@ -45,7 +72,7 @@ classdef PracticeSession < handle
             pause(2);
 
             %% Play and record
-            play(app.player);
+            play(app.player); 
             self.recordPractice(app);
 
             %% Release resources
@@ -60,7 +87,7 @@ classdef PracticeSession < handle
             app.ResultsTextArea.Value = sprintf('Average: %d\nAverage early: %d\nAverage late: %d', self.timingInfo.average, self.timingInfo.avgEarly, self.timingInfo.avgLate);
         end
 
-        function stopPractice(self, app)
+        function stopPractice(~, app)
             stop(app.player);
         end
 
@@ -73,16 +100,16 @@ classdef PracticeSession < handle
                 self.addFrame([zeros(numOverrun, 1); audioFrame]);
             end
 
-            %% Debug
+            % Debug
             % cursor = 1;
             % frameSize = 256;
-            % testAudio = audioread('audioResources/metronome.wav');
-            % testAudio = circshift(testAudio, 8000);
+            % testAudio = audioread('audioResources/test.wav');
 
             % while cursor + frameSize < length(testAudio)
             %     audioFrame = testAudio(cursor:cursor + frameSize - 1);
             %     cursor = cursor + frameSize;
             %     self.addFrame(audioFrame);
+            %     pause(length(audioFrame) / self.fs);
             % end
         end
 
@@ -100,7 +127,7 @@ classdef PracticeSession < handle
 
             for iter = 1:numIter
                 self.runPractice(app);
-                lagSum = lagSum + self.timingInfo.errors(1).value;
+                lagSum = lagSum + self.timingInfo.average;
                 multiWaitbar('Measuring average audio lag...', iter / numIter);
                 pause(1);
             end

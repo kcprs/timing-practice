@@ -11,8 +11,8 @@ classdef Metronome < handle
         function self = Metronome(session)
             self.session = session;
             tick = audioread('audioResources/tick.wav');
-            interval = idivide(60 * self.session.fs, int32(self.session.tempo), 'round');
-            metronomeLength = interval * idivide(self.session.duration * self.session.fs, interval, 'round');
+            interval = idivide(60 * int64(self.session.fs), int64(self.session.tempo), 'round');
+            metronomeLength = interval * idivide(int64(self.session.duration * self.session.fs), interval, 'round');
             self.ticks = zeros(metronomeLength, 1);
 
             cursor = 1;
@@ -54,7 +54,7 @@ classdef Metronome < handle
         end
 
         function tickDist = getTickDistance(self)
-            tickDist = idivide(60 * self.session.fs, int32(self.session.tempo), 'round');
+            tickDist = idivide(int64(60 * self.session.fs), int64(self.session.tempo), 'round');
         end
 
     end

@@ -3,28 +3,38 @@
     % Properties that correspond to app components
     properties (Access = public)
         UIFigure                   matlab.ui.Figure
-        PracticeSettingsPanel      matlab.ui.container.Panel
+        TabGroup                   matlab.ui.container.TabGroup
+        MainTab                    matlab.ui.container.Tab
+        EarlyLampLabel             matlab.ui.control.Label
+        EarlyLamp                  matlab.ui.control.Lamp
+        OKLampLabel                matlab.ui.control.Label
+        OKLamp                     matlab.ui.control.Lamp
+        LateLampLabel              matlab.ui.control.Label
+        LateLamp                   matlab.ui.control.Lamp
+        StartButton                matlab.ui.control.Button
+        TimingGauge                matlab.ui.control.LinearGauge
+        StopButton                 matlab.ui.control.Button
+        PracticeOptionsPanel       matlab.ui.container.Panel
         TempoBPMEditFieldLabel     matlab.ui.control.Label
         TempoField                 matlab.ui.control.NumericEditField
         DurationminEditFieldLabel  matlab.ui.control.Label
         DurationField              matlab.ui.control.NumericEditField
-        StartButton                matlab.ui.control.Button
-        StopButton                 matlab.ui.control.Button
+        ResultsTab                 matlab.ui.container.Tab
         TimingPlot                 matlab.ui.control.UIAxes
-        SystemSettingsPanel        matlab.ui.container.Panel
-        SampleRateDropDownLabel    matlab.ui.control.Label
-        SampleRateDropDown         matlab.ui.control.DropDown
-        BufferSizeDropDownLabel    matlab.ui.control.Label
-        BufferSizeDropDown         matlab.ui.control.DropDown
-        SliderLabel                matlab.ui.control.Label
         PlayheadSlider             matlab.ui.control.Slider
         NextOnsetButton            matlab.ui.control.Button
         PreviousOnsetButton        matlab.ui.control.Button
         PreviousTickButton         matlab.ui.control.Button
         NextTickButton             matlab.ui.control.Button
-        MeasureAudioLagButton      matlab.ui.control.Button
         ResultsTextAreaLabel       matlab.ui.control.Label
         ResultsTextArea            matlab.ui.control.TextArea
+        SettingsTab                matlab.ui.container.Tab
+        SystemSettingsPanel        matlab.ui.container.Panel
+        SampleRateDropDownLabel    matlab.ui.control.Label
+        SampleRateDropDown         matlab.ui.control.DropDown
+        BufferSizeDropDownLabel    matlab.ui.control.Label
+        BufferSizeDropDown         matlab.ui.control.DropDown
+        MeasureAudioLagButton      matlab.ui.control.Button
     end
 
     
@@ -32,7 +42,6 @@
         session;
         player;
         deviceReader;
-%         fileWriter;
         
         playheadLoc;
         playheadPlot;
@@ -98,61 +107,158 @@
             app.UIFigure.Position = [100 100 1163 750];
             app.UIFigure.Name = 'UI Figure';
 
-            % Create PracticeSettingsPanel
-            app.PracticeSettingsPanel = uipanel(app.UIFigure);
-            app.PracticeSettingsPanel.Title = 'Practice Settings';
-            app.PracticeSettingsPanel.Position = [32 593 243 128];
+            % Create TabGroup
+            app.TabGroup = uitabgroup(app.UIFigure);
+            app.TabGroup.Position = [1 1 1163 750];
+
+            % Create MainTab
+            app.MainTab = uitab(app.TabGroup);
+            app.MainTab.Title = 'Main';
+
+            % Create EarlyLampLabel
+            app.EarlyLampLabel = uilabel(app.MainTab);
+            app.EarlyLampLabel.HorizontalAlignment = 'right';
+            app.EarlyLampLabel.Position = [94 573 33 22];
+            app.EarlyLampLabel.Text = 'Early';
+
+            % Create EarlyLamp
+            app.EarlyLamp = uilamp(app.MainTab);
+            app.EarlyLamp.Position = [142 492 183 183];
+            app.EarlyLamp.Color = [0.902 0.902 0.902];
+
+            % Create OKLampLabel
+            app.OKLampLabel = uilabel(app.MainTab);
+            app.OKLampLabel.HorizontalAlignment = 'right';
+            app.OKLampLabel.Position = [457 572 25 22];
+            app.OKLampLabel.Text = 'OK';
+
+            % Create OKLamp
+            app.OKLamp = uilamp(app.MainTab);
+            app.OKLamp.Position = [497 492 181 181];
+            app.OKLamp.Color = [0.902 0.902 0.902];
+
+            % Create LateLampLabel
+            app.LateLampLabel = uilabel(app.MainTab);
+            app.LateLampLabel.HorizontalAlignment = 'right';
+            app.LateLampLabel.Position = [810 572 29 22];
+            app.LateLampLabel.Text = 'Late';
+
+            % Create LateLamp
+            app.LateLamp = uilamp(app.MainTab);
+            app.LateLamp.Position = [854 492 181 181];
+            app.LateLamp.Color = [0.902 0.902 0.902];
+
+            % Create StartButton
+            app.StartButton = uibutton(app.MainTab, 'push');
+            app.StartButton.ButtonPushedFcn = createCallbackFcn(app, @StartButtonPushed, true);
+            app.StartButton.Position = [350 183 100 22];
+            app.StartButton.Text = 'Start';
+
+            % Create StopButton
+            app.StopButton = uibutton(app.MainTab, 'push');
+            app.StopButton.ButtonPushedFcn = createCallbackFcn(app, @StopButtonPushed, true);
+            app.StopButton.Position = [350 148 100 22];
+            app.StopButton.Text = 'Stop';
+
+            % Create PracticeOptionsPanel
+            app.PracticeOptionsPanel = uipanel(app.MainTab);
+            app.PracticeOptionsPanel.Title = 'Practice Options';
+            app.PracticeOptionsPanel.Position = [62 118 243 128];
 
             % Create TempoBPMEditFieldLabel
-            app.TempoBPMEditFieldLabel = uilabel(app.PracticeSettingsPanel);
+            app.TempoBPMEditFieldLabel = uilabel(app.PracticeOptionsPanel);
             app.TempoBPMEditFieldLabel.HorizontalAlignment = 'right';
             app.TempoBPMEditFieldLabel.Position = [24 65 79 22];
             app.TempoBPMEditFieldLabel.Text = 'Tempo (BPM)';
 
             % Create TempoField
-            app.TempoField = uieditfield(app.PracticeSettingsPanel, 'numeric');
+            app.TempoField = uieditfield(app.PracticeOptionsPanel, 'numeric');
             app.TempoField.Limits = [40 320];
             app.TempoField.RoundFractionalValues = 'on';
             app.TempoField.Position = [121 65 100 22];
             app.TempoField.Value = 120;
 
             % Create DurationminEditFieldLabel
-            app.DurationminEditFieldLabel = uilabel(app.PracticeSettingsPanel);
+            app.DurationminEditFieldLabel = uilabel(app.PracticeOptionsPanel);
             app.DurationminEditFieldLabel.HorizontalAlignment = 'right';
             app.DurationminEditFieldLabel.Position = [24 23 82 22];
             app.DurationminEditFieldLabel.Text = 'Duration (min)';
 
             % Create DurationField
-            app.DurationField = uieditfield(app.PracticeSettingsPanel, 'numeric');
+            app.DurationField = uieditfield(app.PracticeOptionsPanel, 'numeric');
             app.DurationField.LowerLimitInclusive = 'off';
             app.DurationField.Limits = [0 60];
             app.DurationField.Position = [121 23 100 22];
             app.DurationField.Value = 0.1;
 
-            % Create StartButton
-            app.StartButton = uibutton(app.UIFigure, 'push');
-            app.StartButton.ButtonPushedFcn = createCallbackFcn(app, @StartButtonPushed, true);
-            app.StartButton.Position = [104 552 100 22];
-            app.StartButton.Text = 'Start';
+            % Create TimingGauge
+            app.TimingGauge = uigauge(app.MainTab, 'linear');
+            app.TimingGauge.Limits = [-1 1];
+            app.TimingGauge.ScaleColors = [1 0 0;0 1 0;1 0 0;1 0.8667 0;1 0.8706 0];
+            app.TimingGauge.ScaleColorLimits = [-1 -0.5;-0.05 0.05;0.5 1;-0.5 -0.05;0.05 0.5];
+            app.TimingGauge.Position = [71 404 1021.984375 40];
 
-            % Create StopButton
-            app.StopButton = uibutton(app.UIFigure, 'push');
-            app.StopButton.ButtonPushedFcn = createCallbackFcn(app, @StopButtonPushed, true);
-            app.StopButton.Position = [104 517 100 22];
-            app.StopButton.Text = 'Stop';
+            % Create ResultsTab
+            app.ResultsTab = uitab(app.TabGroup);
+            app.ResultsTab.Title = 'Results';
 
             % Create TimingPlot
-            app.TimingPlot = uiaxes(app.UIFigure);
+            app.TimingPlot = uiaxes(app.ResultsTab);
             title(app.TimingPlot, 'Title')
             xlabel(app.TimingPlot, 'X')
             ylabel(app.TimingPlot, 'Y')
-            app.TimingPlot.PlotBoxAspectRatio = [1 0.355325164938737 0.355325164938737];
-            app.TimingPlot.Position = [29 67 1108 432];
+            app.TimingPlot.Position = [17 323 1134 377];
+
+            % Create PlayheadSlider
+            app.PlayheadSlider = uislider(app.ResultsTab);
+            app.PlayheadSlider.Limits = [0 1];
+            app.PlayheadSlider.MajorTicks = [];
+            app.PlayheadSlider.ValueChangedFcn = createCallbackFcn(app, @PlayheadSliderValueChanged, true);
+            app.PlayheadSlider.MinorTicks = [];
+            app.PlayheadSlider.Position = [57 322 1085 3];
+
+            % Create NextOnsetButton
+            app.NextOnsetButton = uibutton(app.ResultsTab, 'push');
+            app.NextOnsetButton.ButtonPushedFcn = createCallbackFcn(app, @NextOnsetButtonPushed, true);
+            app.NextOnsetButton.Position = [469 137 100 22];
+            app.NextOnsetButton.Text = 'Next Onset';
+
+            % Create PreviousOnsetButton
+            app.PreviousOnsetButton = uibutton(app.ResultsTab, 'push');
+            app.PreviousOnsetButton.ButtonPushedFcn = createCallbackFcn(app, @PreviousOnsetButtonPushed, true);
+            app.PreviousOnsetButton.Position = [345 137 100 22];
+            app.PreviousOnsetButton.Text = 'Previous Onset';
+
+            % Create PreviousTickButton
+            app.PreviousTickButton = uibutton(app.ResultsTab, 'push');
+            app.PreviousTickButton.ButtonPushedFcn = createCallbackFcn(app, @PreviousTickButtonPushed, true);
+            app.PreviousTickButton.Position = [345 172 100 22];
+            app.PreviousTickButton.Text = 'Previous Tick';
+
+            % Create NextTickButton
+            app.NextTickButton = uibutton(app.ResultsTab, 'push');
+            app.NextTickButton.ButtonPushedFcn = createCallbackFcn(app, @NextTickButtonPushed, true);
+            app.NextTickButton.Position = [468 172 100 22];
+            app.NextTickButton.Text = 'Next Tick';
+
+            % Create ResultsTextAreaLabel
+            app.ResultsTextAreaLabel = uilabel(app.ResultsTab);
+            app.ResultsTextAreaLabel.HorizontalAlignment = 'right';
+            app.ResultsTextAreaLabel.Position = [627 172 46 22];
+            app.ResultsTextAreaLabel.Text = 'Results';
+
+            % Create ResultsTextArea
+            app.ResultsTextArea = uitextarea(app.ResultsTab);
+            app.ResultsTextArea.Position = [688 136 150 60];
+
+            % Create SettingsTab
+            app.SettingsTab = uitab(app.TabGroup);
+            app.SettingsTab.Title = 'Settings';
 
             % Create SystemSettingsPanel
-            app.SystemSettingsPanel = uipanel(app.UIFigure);
+            app.SystemSettingsPanel = uipanel(app.SettingsTab);
             app.SystemSettingsPanel.Title = 'System Settings';
-            app.SystemSettingsPanel.Position = [359 593 243 128];
+            app.SystemSettingsPanel.Position = [642 497 243 128];
 
             % Create SampleRateDropDownLabel
             app.SampleRateDropDownLabel = uilabel(app.SystemSettingsPanel);
@@ -178,59 +284,11 @@
             app.BufferSizeDropDown.Position = [120 23 101 22];
             app.BufferSizeDropDown.Value = '256';
 
-            % Create SliderLabel
-            app.SliderLabel = uilabel(app.UIFigure);
-            app.SliderLabel.HorizontalAlignment = 'right';
-            app.SliderLabel.Position = [13 46 36 22];
-            app.SliderLabel.Text = 'Slider';
-
-            % Create PlayheadSlider
-            app.PlayheadSlider = uislider(app.UIFigure);
-            app.PlayheadSlider.Limits = [0 1];
-            app.PlayheadSlider.MajorTicks = [];
-            app.PlayheadSlider.ValueChangedFcn = createCallbackFcn(app, @PlayheadSliderValueChanged, true);
-            app.PlayheadSlider.MinorTicks = [];
-            app.PlayheadSlider.Position = [67 55 1061 3];
-
-            % Create NextOnsetButton
-            app.NextOnsetButton = uibutton(app.UIFigure, 'push');
-            app.NextOnsetButton.ButtonPushedFcn = createCallbackFcn(app, @NextOnsetButtonPushed, true);
-            app.NextOnsetButton.Position = [892 517 100 22];
-            app.NextOnsetButton.Text = 'Next Onset';
-
-            % Create PreviousOnsetButton
-            app.PreviousOnsetButton = uibutton(app.UIFigure, 'push');
-            app.PreviousOnsetButton.ButtonPushedFcn = createCallbackFcn(app, @PreviousOnsetButtonPushed, true);
-            app.PreviousOnsetButton.Position = [768 517 100 22];
-            app.PreviousOnsetButton.Text = 'Previous Onset';
-
-            % Create PreviousTickButton
-            app.PreviousTickButton = uibutton(app.UIFigure, 'push');
-            app.PreviousTickButton.ButtonPushedFcn = createCallbackFcn(app, @PreviousTickButtonPushed, true);
-            app.PreviousTickButton.Position = [768 552 100 22];
-            app.PreviousTickButton.Text = 'Previous Tick';
-
-            % Create NextTickButton
-            app.NextTickButton = uibutton(app.UIFigure, 'push');
-            app.NextTickButton.ButtonPushedFcn = createCallbackFcn(app, @NextTickButtonPushed, true);
-            app.NextTickButton.Position = [891 552 100 22];
-            app.NextTickButton.Text = 'Next Tick';
-
             % Create MeasureAudioLagButton
-            app.MeasureAudioLagButton = uibutton(app.UIFigure, 'push');
+            app.MeasureAudioLagButton = uibutton(app.SettingsTab, 'push');
             app.MeasureAudioLagButton.ButtonPushedFcn = createCallbackFcn(app, @MeasureAudioLagButtonPushed, true);
-            app.MeasureAudioLagButton.Position = [400 531 120 22];
+            app.MeasureAudioLagButton.Position = [398 562 120 22];
             app.MeasureAudioLagButton.Text = 'Measure Audio Lag';
-
-            % Create ResultsTextAreaLabel
-            app.ResultsTextAreaLabel = uilabel(app.UIFigure);
-            app.ResultsTextAreaLabel.HorizontalAlignment = 'right';
-            app.ResultsTextAreaLabel.Position = [778 673 46 22];
-            app.ResultsTextAreaLabel.Text = 'Results';
-
-            % Create ResultsTextArea
-            app.ResultsTextArea = uitextarea(app.UIFigure);
-            app.ResultsTextArea.Position = [839 637 150 60];
         end
     end
 
