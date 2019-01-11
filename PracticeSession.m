@@ -9,6 +9,7 @@ classdef PracticeSession < handle
         audioIn;
         audioCursor;
         timingInfo;
+        resultsPlot;
     end
 
     methods
@@ -16,6 +17,13 @@ classdef PracticeSession < handle
         function self = PracticeSession(app)
             self.app = app;
             self.timingInfo = TimingInfo();
+
+            if exist('resources/audioLag.mat', 'file')
+                lagStruct = load('resources/audioLag.mat');
+                self.timingInfo.audioLag = lagStruct.audioLag;
+            end
+
+            self.resultsPlot = ResultsPlot(self, app.TimingPlot, app.PlayheadSlider);
         end
 
         function prepare(self, app)
@@ -62,17 +70,17 @@ classdef PracticeSession < handle
         function runPractice(self, app)
             %% Setup player
             self.prepare(app);
-            app.player = audioplayer(self.metronome.audio, str2double(app.SampleRateDropDown.Value));
+            app.player = audioplayer(self.metronome.audio, str2double(app.SampleRateDropDown.Value), 16, app.OutputDeviceDropDown.Value);
 
             %% Setup recorder
-            app.deviceReader = audioDeviceReader(str2double(app.SampleRateDropDown.Value), str2double(app.BufferSizeDropDown.Value));
+            app.deviceReader = audioDeviceReader('SampleRate', str2double(app.SampleRateDropDown.Value), 'SamplesPerFrame', str2double(app.BufferSizeDropDown.Value), 'Device', app.InputDeviceDropDown.Value);
             setup(app.deviceReader);
 
             % Wait for the soundcard to set up
             pause(2);
 
             %% Play and record
-            play(app.player); 
+            play(app.player);
             self.recordPractice(app);
 
             %% Release resources
@@ -97,13 +105,19 @@ classdef PracticeSession < handle
             while app.player.isplaying() && toc <= self.duration + 1
                 drawnow();
                 [audioFrame, numOverrun] = app.deviceReader();
+
+                if numOverrun ~= 0
+                    disp('Overrun');
+                    disp(numOverrun);
+                end
+
                 self.addFrame([zeros(numOverrun, 1); audioFrame]);
             end
 
             % Debug
             % cursor = 1;
             % frameSize = 256;
-            % testAudio = audioread('audioResources/test.wav');
+            % testAudio = audioread('resources/test.wav');
 
             % while cursor + frameSize < length(testAudio)
             %     audioFrame = testAudio(cursor:cursor + frameSize - 1);
@@ -114,6 +128,7 @@ classdef PracticeSession < handle
         end
 
         function measureAudioLag(self, app)
+            app.UIFigure.Visible = 'off';
             multiWaitbar('Measuring average audio lag...');
             setTempo = app.TempoField.Value;
             setDuration = app.DurationField.Value;
@@ -132,10 +147,20 @@ classdef PracticeSession < handle
                 pause(1);
             end
 
-            self.timingInfo.audioLag = round(lagSum / numIter);
+            audioLag = round(lagSum / numIter);
+            self.timingInfo.audioLag = audioLag;
+            save('resources/audioLag.mat', 'audioLag');
 
             app.TempoField.Value = setTempo;
             app.DurationField.Value = setDuration;
+            app.EarlyLamp.Color = Colours.grey;
+            app.OKLamp.Color = Colours.grey;
+            app.LateLamp.Color = Colours.grey;
+            app.TimingGauge.Value = 0;
+            app.UIFigure.Visible = 'on';
+            app.TabGroup.SelectedTab = app.MainTab;
+            cla(app.TimingPlot);
+            app.ResultsTextArea.Value = '';
             multiWaitbar('Measuring average audio lag...', 'Close');
         end
 
@@ -144,7 +169,7 @@ classdef PracticeSession < handle
             self.timingInfo.runExtAnalysis();
         end
 
-        function plot(self, ax)
+        function plot(self, ax)% TODO: Move to ResultsPlot
             lagCompAudioIn = self.audioIn(self.timingInfo.audioLag + 1:end);
             lagCompNovelty = self.timingInfo.novelty(self.timingInfo.audioLag + 1:end);
             time = linspace(0, length(lagCompAudioIn) / self.fs, length(lagCompAudioIn));
@@ -156,6 +181,7 @@ classdef PracticeSession < handle
             tickTimes = self.timingInfo.tickLocs / self.fs;
             plot(ax, tickTimes, zeros(length(tickTimes), 1), '+', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'g');
             hold(ax, 'off');
+            self.resultsPlot.initXLim = ax.XLim;
         end
 
     end

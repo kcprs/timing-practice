@@ -10,7 +10,7 @@ classdef Metronome < handle
 
         function self = Metronome(session)
             self.session = session;
-            tick = audioread('audioResources/tick.wav');
+            tick = audioread('resources/tick.wav');
             interval = idivide(60 * int64(self.session.fs), int64(self.session.tempo), 'round');
             metronomeLength = interval * idivide(int64(self.session.duration * self.session.fs), interval, 'round');
             self.ticks = zeros(metronomeLength, 1);

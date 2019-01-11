@@ -12,13 +12,13 @@
         LateLampLabel              matlab.ui.control.Label
         LateLamp                   matlab.ui.control.Lamp
         StartButton                matlab.ui.control.Button
-        TimingGauge                matlab.ui.control.LinearGauge
         StopButton                 matlab.ui.control.Button
         PracticeOptionsPanel       matlab.ui.container.Panel
         TempoBPMEditFieldLabel     matlab.ui.control.Label
         TempoField                 matlab.ui.control.NumericEditField
         DurationminEditFieldLabel  matlab.ui.control.Label
         DurationField              matlab.ui.control.NumericEditField
+        TimingGauge                matlab.ui.control.LinearGauge
         ResultsTab                 matlab.ui.container.Tab
         TimingPlot                 matlab.ui.control.UIAxes
         PlayheadSlider             matlab.ui.control.Slider
@@ -28,12 +28,17 @@
         NextTickButton             matlab.ui.control.Button
         ResultsTextAreaLabel       matlab.ui.control.Label
         ResultsTextArea            matlab.ui.control.TextArea
+        ZoomSlider                 matlab.ui.control.Slider
         SettingsTab                matlab.ui.container.Tab
         SystemSettingsPanel        matlab.ui.container.Panel
         SampleRateDropDownLabel    matlab.ui.control.Label
         SampleRateDropDown         matlab.ui.control.DropDown
         BufferSizeDropDownLabel    matlab.ui.control.Label
         BufferSizeDropDown         matlab.ui.control.DropDown
+        InputDeviceDropDownLabel   matlab.ui.control.Label
+        InputDeviceDropDown        matlab.ui.control.DropDown
+        OutputDeviceDropDownLabel  matlab.ui.control.Label
+        OutputDeviceDropDown       matlab.ui.control.DropDown
         MeasureAudioLagButton      matlab.ui.control.Button
     end
 
@@ -42,9 +47,6 @@
         session;
         player;
         deviceReader;
-        
-        playheadLoc;
-        playheadPlot;
     end
     
 
@@ -58,6 +60,7 @@
         % Button pushed function: StartButton
         function StartButtonPushed(app, event)
             app.session.runPractice(app);
+            app.TabGroup.SelectedTab = app.ResultsTab;
         end
 
         % Button pushed function: StopButton
@@ -67,32 +70,43 @@
 
         % Value changed function: PlayheadSlider
         function PlayheadSliderValueChanged(app, event)
-            movePlayhead(app, app.PlayheadSlider.Value * app.session.fs * app.TimingPlot.XLim(2));
+            app.session.resultsPlot.playheadSliderMoved(app.PlayheadSlider.Value);
         end
 
         % Button pushed function: NextOnsetButton
         function NextOnsetButtonPushed(app, event)
-            movePlayheadTo('next', 'onset', app);
+            app.session.resultsPlot.movePlayheadTo('next', 'onset');
         end
 
         % Button pushed function: PreviousOnsetButton
         function PreviousOnsetButtonPushed(app, event)
-            movePlayheadTo('previous', 'onset', app);
+            app.session.resultsPlot.movePlayheadTo('previous', 'onset');
         end
 
         % Button pushed function: PreviousTickButton
         function PreviousTickButtonPushed(app, event)
-            movePlayheadTo('previous', 'tick', app);
+            app.session.resultsPlot.movePlayheadTo('previous', 'tick');
         end
 
         % Button pushed function: NextTickButton
         function NextTickButtonPushed(app, event)
-            movePlayheadTo('next', 'tick', app);
+            app.session.resultsPlot.movePlayheadTo('next', 'tick');
         end
 
         % Button pushed function: MeasureAudioLagButton
         function MeasureAudioLagButtonPushed(app, event)
             app.session.measureAudioLag(app);
+        end
+
+        % Value changed function: ZoomSlider
+        function ZoomSliderValueChanged(app, event)
+            app.session.resultsPlot.zoom(app.ZoomSlider.Value);
+        end
+
+        % Value changed function: InputDeviceDropDown, 
+        % OutputDeviceDropDown
+        function IODeviceChanged(app, event)
+            saveIoSettings(app);
         end
     end
 
@@ -207,7 +221,8 @@
             title(app.TimingPlot, 'Title')
             xlabel(app.TimingPlot, 'X')
             ylabel(app.TimingPlot, 'Y')
-            app.TimingPlot.Position = [17 323 1134 377];
+            app.TimingPlot.PlotBoxAspectRatio = [1 0.310144927536232 0.310144927536232];
+            app.TimingPlot.Position = [17 324 1082 376];
 
             % Create PlayheadSlider
             app.PlayheadSlider = uislider(app.ResultsTab);
@@ -215,7 +230,7 @@
             app.PlayheadSlider.MajorTicks = [];
             app.PlayheadSlider.ValueChangedFcn = createCallbackFcn(app, @PlayheadSliderValueChanged, true);
             app.PlayheadSlider.MinorTicks = [];
-            app.PlayheadSlider.Position = [57 322 1085 3];
+            app.PlayheadSlider.Position = [57 322 1034 3];
 
             % Create NextOnsetButton
             app.NextOnsetButton = uibutton(app.ResultsTab, 'push');
@@ -238,7 +253,7 @@
             % Create NextTickButton
             app.NextTickButton = uibutton(app.ResultsTab, 'push');
             app.NextTickButton.ButtonPushedFcn = createCallbackFcn(app, @NextTickButtonPushed, true);
-            app.NextTickButton.Position = [468 172 100 22];
+            app.NextTickButton.Position = [469 172 100 22];
             app.NextTickButton.Text = 'Next Tick';
 
             % Create ResultsTextAreaLabel
@@ -251,6 +266,15 @@
             app.ResultsTextArea = uitextarea(app.ResultsTab);
             app.ResultsTextArea.Position = [688 136 150 60];
 
+            % Create ZoomSlider
+            app.ZoomSlider = uislider(app.ResultsTab);
+            app.ZoomSlider.Limits = [0 1];
+            app.ZoomSlider.MajorTicks = [];
+            app.ZoomSlider.Orientation = 'vertical';
+            app.ZoomSlider.ValueChangedFcn = createCallbackFcn(app, @ZoomSliderValueChanged, true);
+            app.ZoomSlider.MinorTicks = [];
+            app.ZoomSlider.Position = [1110 363 3 315];
+
             % Create SettingsTab
             app.SettingsTab = uitab(app.TabGroup);
             app.SettingsTab.Title = 'Settings';
@@ -258,36 +282,58 @@
             % Create SystemSettingsPanel
             app.SystemSettingsPanel = uipanel(app.SettingsTab);
             app.SystemSettingsPanel.Title = 'System Settings';
-            app.SystemSettingsPanel.Position = [642 497 243 128];
+            app.SystemSettingsPanel.Position = [389 461 716 220];
 
             % Create SampleRateDropDownLabel
             app.SampleRateDropDownLabel = uilabel(app.SystemSettingsPanel);
             app.SampleRateDropDownLabel.HorizontalAlignment = 'right';
-            app.SampleRateDropDownLabel.Position = [24 65 75 22];
+            app.SampleRateDropDownLabel.Position = [24 69 75 22];
             app.SampleRateDropDownLabel.Text = 'Sample Rate';
 
             % Create SampleRateDropDown
             app.SampleRateDropDown = uidropdown(app.SystemSettingsPanel);
             app.SampleRateDropDown.Items = {'44100', '48000'};
-            app.SampleRateDropDown.Position = [120 65 101 22];
+            app.SampleRateDropDown.Position = [120 69 101 22];
             app.SampleRateDropDown.Value = '44100';
 
             % Create BufferSizeDropDownLabel
             app.BufferSizeDropDownLabel = uilabel(app.SystemSettingsPanel);
             app.BufferSizeDropDownLabel.HorizontalAlignment = 'right';
-            app.BufferSizeDropDownLabel.Position = [24 23 64 22];
+            app.BufferSizeDropDownLabel.Position = [24 27 64 22];
             app.BufferSizeDropDownLabel.Text = 'Buffer Size';
 
             % Create BufferSizeDropDown
             app.BufferSizeDropDown = uidropdown(app.SystemSettingsPanel);
-            app.BufferSizeDropDown.Items = {'128', '256', '512'};
-            app.BufferSizeDropDown.Position = [120 23 101 22];
-            app.BufferSizeDropDown.Value = '256';
+            app.BufferSizeDropDown.Items = {'128', '256', '512', '1024'};
+            app.BufferSizeDropDown.Position = [120 27 101 22];
+            app.BufferSizeDropDown.Value = '512';
+
+            % Create InputDeviceDropDownLabel
+            app.InputDeviceDropDownLabel = uilabel(app.SystemSettingsPanel);
+            app.InputDeviceDropDownLabel.HorizontalAlignment = 'right';
+            app.InputDeviceDropDownLabel.Position = [24 153 72 22];
+            app.InputDeviceDropDownLabel.Text = 'Input Device';
+
+            % Create InputDeviceDropDown
+            app.InputDeviceDropDown = uidropdown(app.SystemSettingsPanel);
+            app.InputDeviceDropDown.ValueChangedFcn = createCallbackFcn(app, @IODeviceChanged, true);
+            app.InputDeviceDropDown.Position = [121 153 565 22];
+
+            % Create OutputDeviceDropDownLabel
+            app.OutputDeviceDropDownLabel = uilabel(app.SystemSettingsPanel);
+            app.OutputDeviceDropDownLabel.HorizontalAlignment = 'right';
+            app.OutputDeviceDropDownLabel.Position = [24 111 82 22];
+            app.OutputDeviceDropDownLabel.Text = 'Output Device';
+
+            % Create OutputDeviceDropDown
+            app.OutputDeviceDropDown = uidropdown(app.SystemSettingsPanel);
+            app.OutputDeviceDropDown.ValueChangedFcn = createCallbackFcn(app, @IODeviceChanged, true);
+            app.OutputDeviceDropDown.Position = [121 111 565 22];
 
             % Create MeasureAudioLagButton
             app.MeasureAudioLagButton = uibutton(app.SettingsTab, 'push');
             app.MeasureAudioLagButton.ButtonPushedFcn = createCallbackFcn(app, @MeasureAudioLagButtonPushed, true);
-            app.MeasureAudioLagButton.Position = [398 562 120 22];
+            app.MeasureAudioLagButton.Position = [113 551 120 22];
             app.MeasureAudioLagButton.Text = 'Measure Audio Lag';
         end
     end
