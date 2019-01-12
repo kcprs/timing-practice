@@ -47,8 +47,8 @@ classdef PracticeSession < handle
             self.audioCursor = self.audioCursor + length(frame);
             self.timingInfo.addFrame(frame);
 
-            if ~isempty(self.timingInfo.errors)
-                recentError = self.timingInfo.errors(self.timingInfo.errorCursor - 1);
+            if ~isempty(self.timingInfo.onsets)
+                recentError = self.timingInfo.onsets(self.timingInfo.onsetInfoCursor - 1);
 
                 if strcmp(recentError.timing, 'early')
                     self.app.EarlyLamp.Color = Colours.red;
@@ -95,7 +95,6 @@ classdef PracticeSession < handle
             %% Plot the results
             self.resultsReady = true;
             self.resultsPlot.plotSession(self);
-            app.ResultsTextArea.Value = sprintf('Average: %d\nAverage early: %d\nAverage late: %d', self.timingInfo.average, self.timingInfo.avgEarly, self.timingInfo.avgLate);
         end
 
         function stopPractice(~, app)

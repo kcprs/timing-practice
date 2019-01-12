@@ -1,6 +1,7 @@
-classdef TimingError < handle
+classdef OnsetInfo < handle
+
     properties
-        onset;
+        loc;
         prevTick;
         nextTick;
         closestTick;
@@ -10,25 +11,29 @@ classdef TimingError < handle
     end
 
     methods
-        function self = TimingError(onset, prevTick, nextTick, tolerance)
-            self.onset = onset;
+
+        function self = OnsetInfo(loc, prevTick, nextTick, tolerance)
+            self.loc = loc;
             self.prevTick = prevTick;
             self.nextTick = nextTick;
             self.tolerance = tolerance;
 
-            if (onset - prevTick < nextTick - onset || nextTick == 0) && prevTick ~= 0
+            if (loc - prevTick < nextTick - loc || nextTick == 0) && prevTick ~= 0
                 self.closestTick = prevTick;
-                self.timing = 'late';
+                self.timing = 'Late';
             else
                 self.closestTick = nextTick;
-                self.timing = 'early';
+                self.timing = 'Early';
             end
-            
-            self.value = self.onset - self.closestTick;
+
+            self.value = self.loc - self.closestTick;
 
             if abs(self.value) < self.tolerance
-                self.timing = 'ok';
+                self.timing = 'OK';
             end
+
         end
+
     end
+
 end

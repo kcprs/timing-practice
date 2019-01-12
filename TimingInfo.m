@@ -13,13 +13,17 @@ classdef TimingInfo < handle
         onsetCursor;
         tickCursor;
         tickLocs;
-        errors;
-        errorCursor;
+        onsets;
+        onsetInfoCursor;
         minOnsetDist;
         average;
         avgEarly;
         avgLate;
         timingTolerance;
+        earlyNum;
+        lateNum;
+        allNum;
+        correctNum;
     end
 
     methods
@@ -41,8 +45,8 @@ classdef TimingInfo < handle
             self.onsetCursor = 1;
             self.tickCursor = 0;
             self.tickLocs = session.metronome.getTickLocs();
-            self.errors = TimingError.empty(0, numOnsets);
-            self.errorCursor = 1;
+            self.onsets = OnsetInfo.empty(0, numOnsets);
+            self.onsetInfoCursor = 1;
             self.minOnsetDist = self.detBufSize / 2;
             self.timingTolerance = session.fs / 100;
         end
@@ -69,33 +73,35 @@ classdef TimingInfo < handle
             end
 
             self.onsetLocs = self.onsetLocs(1:cursor - 1);
-            self.errors = self.errors(1:cursor - 1);
+            self.onsets = self.onsets(1:cursor - 1);
         end
 
         function runExtAnalysis(self)
             early = 0;
-            earlyNum = 0;
+            self.earlyNum = 0;
             late = 0;
-            lateNum = 0;
+            self.lateNum = 0;
             sumAll = 0;
 
             for iter = 1:length(self.onsetLocs)
-                timingError = self.errors(iter);
-                sumAll = sumAll + timingError.value;
+                onsetInfo = self.onsets(iter);
+                sumAll = sumAll + onsetInfo.value;
 
-                if strcmp(timingError.timing, 'early')
-                    early = early + timingError.value;
-                    earlyNum = earlyNum + 1;
-                elseif strcmp(timingError.timing, 'late')
-                    late = late + timingError.value;
-                    lateNum = lateNum + 1;
+                if strcmp(onsetInfo.timing, 'Early')
+                    early = early + onsetInfo.value;
+                    self.earlyNum = self.earlyNum + 1;
+                elseif strcmp(onsetInfo.timing, 'Late')
+                    late = late + onsetInfo.value;
+                    self.lateNum = self.lateNum + 1;
                 end
 
             end
 
-            self.average = sumAll / length(self.errors);
-            self.avgEarly = early / earlyNum;
-            self.avgLate = late / lateNum;
+            self.allNum = length(self.onsets);
+            self.correctNum = self.allNum - self.earlyNum - self.lateNum;
+            self.average = sumAll / self.allNum;
+            self.avgEarly = early / self.earlyNum;
+            self.avgLate = late / self.lateNum;
         end
 
     end
@@ -137,15 +143,18 @@ classdef TimingInfo < handle
                 self.onsetLocs(self.onsetCursor:self.onsetCursor + numOnsets - 1) = newOnsetLocs;
                 self.onsetCursor = self.onsetCursor + numOnsets;
             end
+
         end
 
         function analyseErrors(self, newOnsetLocs)
+
             if self.tickCursor < 1
                 tick = 0;
                 self.tickCursor = 0;
             else
                 tick = self.tickLocs(self.tickCursor);
             end
+
             newOnsetCursor = 1;
 
             while tick < self.detBufLoc + self.detBufSize
@@ -158,9 +167,9 @@ classdef TimingInfo < handle
 
                 while newOnsetCursor <= length(newOnsetLocs) && (newOnsetLocs(newOnsetCursor) <= nextTick || nextTick == 0)
                     onset = newOnsetLocs(newOnsetCursor);
-                    self.errors(self.errorCursor) = TimingError(onset, tick, nextTick, self.timingTolerance);
+                    self.onsets(self.onsetInfoCursor) = OnsetInfo(onset, tick, nextTick, self.timingTolerance);
                     newOnsetCursor = newOnsetCursor + 1;
-                    self.errorCursor = self.errorCursor + 1;
+                    self.onsetInfoCursor = self.onsetInfoCursor + 1;
                 end
 
                 if nextTick == 0

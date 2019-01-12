@@ -2,46 +2,55 @@
 
     % Properties that correspond to app components
     properties (Access = public)
-        TimingPractice             matlab.ui.Figure
-        TabGroup                   matlab.ui.container.TabGroup
-        MainTab                    matlab.ui.container.Tab
-        EarlyLampLabel             matlab.ui.control.Label
-        EarlyLamp                  matlab.ui.control.Lamp
-        OKLampLabel                matlab.ui.control.Label
-        OKLamp                     matlab.ui.control.Lamp
-        LateLampLabel              matlab.ui.control.Label
-        LateLamp                   matlab.ui.control.Lamp
-        StartButton                matlab.ui.control.Button
-        StopButton                 matlab.ui.control.Button
-        PracticeOptionsPanel       matlab.ui.container.Panel
-        TempoBPMEditFieldLabel     matlab.ui.control.Label
-        TempoField                 matlab.ui.control.NumericEditField
-        DurationminEditFieldLabel  matlab.ui.control.Label
-        DurationField              matlab.ui.control.NumericEditField
-        TimingGauge                matlab.ui.control.LinearGauge
-        ResultsTab                 matlab.ui.container.Tab
-        TimingPlot                 matlab.ui.control.UIAxes
-        PlayheadSlider             matlab.ui.control.Slider
-        NextOnsetButton            matlab.ui.control.Button
-        PreviousOnsetButton        matlab.ui.control.Button
-        PreviousTickButton         matlab.ui.control.Button
-        NextTickButton             matlab.ui.control.Button
-        ResultsTextAreaLabel       matlab.ui.control.Label
-        ResultsTextArea            matlab.ui.control.TextArea
-        ZoomSlider                 matlab.ui.control.Slider
-        TimingPlotPreview          matlab.ui.control.UIAxes
-        PreviewPlayheadSlider      matlab.ui.control.Slider
-        SettingsTab                matlab.ui.container.Tab
-        SystemSettingsPanel        matlab.ui.container.Panel
-        SampleRateDropDownLabel    matlab.ui.control.Label
-        SampleRateDropDown         matlab.ui.control.DropDown
-        BufferSizeDropDownLabel    matlab.ui.control.Label
-        BufferSizeDropDown         matlab.ui.control.DropDown
-        InputDeviceDropDownLabel   matlab.ui.control.Label
-        InputDeviceDropDown        matlab.ui.control.DropDown
-        OutputDeviceDropDownLabel  matlab.ui.control.Label
-        OutputDeviceDropDown       matlab.ui.control.DropDown
-        MeasureAudioLagButton      matlab.ui.control.Button
+        TimingPractice              matlab.ui.Figure
+        TabGroup                    matlab.ui.container.TabGroup
+        MainTab                     matlab.ui.container.Tab
+        EarlyLampLabel              matlab.ui.control.Label
+        EarlyLamp                   matlab.ui.control.Lamp
+        OKLampLabel                 matlab.ui.control.Label
+        OKLamp                      matlab.ui.control.Lamp
+        LateLampLabel               matlab.ui.control.Label
+        LateLamp                    matlab.ui.control.Lamp
+        StartButton                 matlab.ui.control.Button
+        StopButton                  matlab.ui.control.Button
+        PracticeOptionsPanel        matlab.ui.container.Panel
+        TempoBPMEditFieldLabel      matlab.ui.control.Label
+        TempoField                  matlab.ui.control.NumericEditField
+        DurationminEditFieldLabel   matlab.ui.control.Label
+        DurationField               matlab.ui.control.NumericEditField
+        TimingGauge                 matlab.ui.control.LinearGauge
+        ResultsTab                  matlab.ui.container.Tab
+        TimingPlot                  matlab.ui.control.UIAxes
+        PlayheadSlider              matlab.ui.control.Slider
+        NextOnsetButton             matlab.ui.control.Button
+        PreviousOnsetButton         matlab.ui.control.Button
+        PreviousTickButton          matlab.ui.control.Button
+        NextTickButton              matlab.ui.control.Button
+        ZoomSlider                  matlab.ui.control.Slider
+        TimingPlotPreview           matlab.ui.control.UIAxes
+        PreviewPlayheadSlider       matlab.ui.control.Slider
+        SelectedOnsetResultsPanel   matlab.ui.container.Panel
+        TimingLabel                 matlab.ui.control.Label
+        ErrorLabel                  matlab.ui.control.Label
+        TimeLabel                   matlab.ui.control.Label
+        GlobalResultsPanel          matlab.ui.container.Panel
+        AverageErrorLabel           matlab.ui.control.Label
+        AverageLateErrorLabel       matlab.ui.control.Label
+        AverageEarlyErrorLabel      matlab.ui.control.Label
+        NumberOfEarlyErrorsLabel    matlab.ui.control.Label
+        NumberOfLateErrorsLabel     matlab.ui.control.Label
+        NumberOfCorrectOnsetsLabel  matlab.ui.control.Label
+        SettingsTab                 matlab.ui.container.Tab
+        SystemSettingsPanel         matlab.ui.container.Panel
+        SampleRateDropDownLabel     matlab.ui.control.Label
+        SampleRateDropDown          matlab.ui.control.DropDown
+        BufferSizeDropDownLabel     matlab.ui.control.Label
+        BufferSizeDropDown          matlab.ui.control.DropDown
+        InputDeviceDropDownLabel    matlab.ui.control.Label
+        InputDeviceDropDown         matlab.ui.control.DropDown
+        OutputDeviceDropDownLabel   matlab.ui.control.Label
+        OutputDeviceDropDown        matlab.ui.control.DropDown
+        MeasureAudioLagButton       matlab.ui.control.Button
     end
 
     
@@ -241,36 +250,26 @@
             % Create NextOnsetButton
             app.NextOnsetButton = uibutton(app.ResultsTab, 'push');
             app.NextOnsetButton.ButtonPushedFcn = createCallbackFcn(app, @NextOnsetButtonPushed, true);
-            app.NextOnsetButton.Position = [479 74 100 22];
+            app.NextOnsetButton.Position = [156 73 100 22];
             app.NextOnsetButton.Text = 'Next Onset';
 
             % Create PreviousOnsetButton
             app.PreviousOnsetButton = uibutton(app.ResultsTab, 'push');
             app.PreviousOnsetButton.ButtonPushedFcn = createCallbackFcn(app, @PreviousOnsetButtonPushed, true);
-            app.PreviousOnsetButton.Position = [355 74 100 22];
+            app.PreviousOnsetButton.Position = [32 73 100 22];
             app.PreviousOnsetButton.Text = 'Previous Onset';
 
             % Create PreviousTickButton
             app.PreviousTickButton = uibutton(app.ResultsTab, 'push');
             app.PreviousTickButton.ButtonPushedFcn = createCallbackFcn(app, @PreviousTickButtonPushed, true);
-            app.PreviousTickButton.Position = [355 109 100 22];
+            app.PreviousTickButton.Position = [32 108 100 22];
             app.PreviousTickButton.Text = 'Previous Tick';
 
             % Create NextTickButton
             app.NextTickButton = uibutton(app.ResultsTab, 'push');
             app.NextTickButton.ButtonPushedFcn = createCallbackFcn(app, @NextTickButtonPushed, true);
-            app.NextTickButton.Position = [479 109 100 22];
+            app.NextTickButton.Position = [156 108 100 22];
             app.NextTickButton.Text = 'Next Tick';
-
-            % Create ResultsTextAreaLabel
-            app.ResultsTextAreaLabel = uilabel(app.ResultsTab);
-            app.ResultsTextAreaLabel.HorizontalAlignment = 'right';
-            app.ResultsTextAreaLabel.Position = [637 109 46 22];
-            app.ResultsTextAreaLabel.Text = 'Results';
-
-            % Create ResultsTextArea
-            app.ResultsTextArea = uitextarea(app.ResultsTab);
-            app.ResultsTextArea.Position = [698 73 150 60];
 
             % Create ZoomSlider
             app.ZoomSlider = uislider(app.ResultsTab);
@@ -294,6 +293,61 @@
             app.PreviewPlayheadSlider.ValueChangedFcn = createCallbackFcn(app, @PreviewPlayheadSliderValueChanged, true);
             app.PreviewPlayheadSlider.MinorTicks = [];
             app.PreviewPlayheadSlider.Position = [81 682 1031 3];
+
+            % Create SelectedOnsetResultsPanel
+            app.SelectedOnsetResultsPanel = uipanel(app.ResultsTab);
+            app.SelectedOnsetResultsPanel.Title = 'Selected Onset Results';
+            app.SelectedOnsetResultsPanel.Position = [317 24 281 139];
+
+            % Create TimingLabel
+            app.TimingLabel = uilabel(app.SelectedOnsetResultsPanel);
+            app.TimingLabel.Position = [15 51 249 22];
+            app.TimingLabel.Text = 'Timing:';
+
+            % Create ErrorLabel
+            app.ErrorLabel = uilabel(app.SelectedOnsetResultsPanel);
+            app.ErrorLabel.Position = [15 18 249 22];
+            app.ErrorLabel.Text = 'Error:';
+
+            % Create TimeLabel
+            app.TimeLabel = uilabel(app.SelectedOnsetResultsPanel);
+            app.TimeLabel.Position = [15 84 249 22];
+            app.TimeLabel.Text = 'Time:';
+
+            % Create GlobalResultsPanel
+            app.GlobalResultsPanel = uipanel(app.ResultsTab);
+            app.GlobalResultsPanel.Title = 'Global Results';
+            app.GlobalResultsPanel.Position = [659 24 464 139];
+
+            % Create AverageErrorLabel
+            app.AverageErrorLabel = uilabel(app.GlobalResultsPanel);
+            app.AverageErrorLabel.Position = [16 84 198 22];
+            app.AverageErrorLabel.Text = 'Average Error:';
+
+            % Create AverageLateErrorLabel
+            app.AverageLateErrorLabel = uilabel(app.GlobalResultsPanel);
+            app.AverageLateErrorLabel.Position = [16 18 198 22];
+            app.AverageLateErrorLabel.Text = 'Average Late Error:';
+
+            % Create AverageEarlyErrorLabel
+            app.AverageEarlyErrorLabel = uilabel(app.GlobalResultsPanel);
+            app.AverageEarlyErrorLabel.Position = [16 51 198 22];
+            app.AverageEarlyErrorLabel.Text = 'Average Early Error:';
+
+            % Create NumberOfEarlyErrorsLabel
+            app.NumberOfEarlyErrorsLabel = uilabel(app.GlobalResultsPanel);
+            app.NumberOfEarlyErrorsLabel.Position = [241 51 202 22];
+            app.NumberOfEarlyErrorsLabel.Text = 'Number Of Early Errors:';
+
+            % Create NumberOfLateErrorsLabel
+            app.NumberOfLateErrorsLabel = uilabel(app.GlobalResultsPanel);
+            app.NumberOfLateErrorsLabel.Position = [241 18 202 22];
+            app.NumberOfLateErrorsLabel.Text = 'Number Of Late Errors:';
+
+            % Create NumberOfCorrectOnsetsLabel
+            app.NumberOfCorrectOnsetsLabel = uilabel(app.GlobalResultsPanel);
+            app.NumberOfCorrectOnsetsLabel.Position = [241 84 202 22];
+            app.NumberOfCorrectOnsetsLabel.Text = 'Number Of Correct Onsets:';
 
             % Create SettingsTab
             app.SettingsTab = uitab(app.TabGroup);

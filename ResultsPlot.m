@@ -1,4 +1,5 @@
 classdef ResultsPlot < handle
+
     properties
         session;
         mainPlot;
@@ -10,9 +11,11 @@ classdef ResultsPlot < handle
         previewPlayheadSlider;
         zoomFactor;
         initXLim;
+        onsetInfoDisplayer;
     end
 
     methods
+
         function self = ResultsPlot(session, mainPlot, previewPlot, playheadSlider, previewPlayheadSlider)
             self.session = session;
             self.mainPlot = mainPlot;
@@ -21,12 +24,13 @@ classdef ResultsPlot < handle
             self.previewPlayheadSlider = previewPlayheadSlider;
             self.playheadPlot = 0;
             self.playheadPreviewPlot = 0;
-            self.playheadLoc = 0;
+            self.playheadLoc = 1;
             self.zoomFactor = 0;
             self.initXLim = [0, 1];
         end
 
         function plotSession(self, session)
+            self.onsetInfoDisplayer = OnsetInfoDisplayer(session.app, self.playheadLoc);
             lagCompAudioIn = session.audioIn(session.timingInfo.audioLag + 1:end);
             lagCompNovelty = session.timingInfo.novelty(session.timingInfo.audioLag + 1:end);
             % time = linspace(0, length(lagCompAudioIn) / session.fs, length(lagCompAudioIn));
@@ -53,6 +57,7 @@ classdef ResultsPlot < handle
         end
 
         function movePlayheadTo(self, direction, locType)
+
             if ~self.session.resultsReady
                 return;
             end
@@ -64,7 +69,7 @@ classdef ResultsPlot < handle
             else
                 error('Unknown loc type');
             end
-        
+
             if strcmp(direction, 'next')
                 dirFactor = 1;
                 cursor = 1;
@@ -74,41 +79,43 @@ classdef ResultsPlot < handle
             else
                 error('Unknown direction')
             end
-        
+
             while cursor + dirFactor <= length(locs) && cursor + dirFactor >= 1 && locs(cursor) * dirFactor <= self.playheadLoc * dirFactor
                 cursor = cursor + dirFactor;
             end
-        
+
             self.movePlayhead(locs(cursor));
         end
-        
+
         function movePlayhead(self, sampleLoc)
+
             if ~self.session.resultsReady
                 return;
             end
 
             % Save playhead location
             self.playheadLoc = sampleLoc;
-            
+
             %% Update playhead slider
             playheadSliderValue = (self.playheadLoc - self.mainPlot.XLim(1)) / (self.mainPlot.XLim(2) - self.mainPlot.XLim(1));
+
             if 0.1 <= playheadSliderValue && playheadSliderValue <= 0.9
                 self.playheadSlider.Value = playheadSliderValue;
             else
                 self.zoom(self.zoomFactor);
                 self.playheadSlider.Value = (self.playheadLoc - self.mainPlot.XLim(1)) / (self.mainPlot.XLim(2) - self.mainPlot.XLim(1));
             end
-            
+
             %% Update playhead plot
             % If exists, delete previous playhead plot
             if self.playheadPlot ~= 0
                 delete(self.playheadPlot);
             end
-            
+
             hold(self.mainPlot, 'on');
             self.playheadPlot = plot(self.mainPlot, [sampleLoc, sampleLoc], self.mainPlot.YLim, 'Color', 'r');
             hold(self.mainPlot, 'off');
-            
+
             %% Update playhead slider for the preview
             self.previewPlayheadSlider.Value = max(0, min(1, sampleLoc / (self.previewPlot.XLim(2) - self.previewPlot.XLim(1))));
 
@@ -117,13 +124,17 @@ classdef ResultsPlot < handle
             if self.playheadPreviewPlot ~= 0
                 delete(self.playheadPreviewPlot);
             end
-        
+
             hold(self.previewPlot, 'on');
             self.playheadPreviewPlot = plot(self.previewPlot, [sampleLoc, sampleLoc], self.previewPlot.YLim, 'Color', 'r');
             hold(self.previewPlot, 'off');
+
+            %% Update displayed onset info
+            self.onsetInfoDisplayer.selectAt(self.playheadLoc);
         end
 
         function zoom(self, zoomFactor)
+
             if ~self.session.resultsReady
                 return;
             end
@@ -155,6 +166,7 @@ classdef ResultsPlot < handle
         function previewPlayheadSliderMoved(self, sliderValue)
             self.movePlayhead(self.previewPlot.XLim(1) + sliderValue * (self.previewPlot.XLim(2) - self.previewPlot.XLim(1)));
         end
+
     end
 
 end

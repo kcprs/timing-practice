@@ -7,11 +7,12 @@ function initialise(app)
 
     app.OutputDeviceDropDown.Items = strings(length(outputDevices), 0);
     app.OutputDeviceDropDown.ItemsData = zeros(length(outputDevices), 0);
+
     for iter = 1:length(outputDevices)
         app.OutputDeviceDropDown.Items(iter) = cellstr(outputDevices(iter).Name);
         app.OutputDeviceDropDown.ItemsData(iter) = outputDevices(iter).ID;
     end
-    
+
     app.deviceReader = audioDeviceReader('SampleRate', str2double(app.SampleRateDropDown.Value), 'SamplesPerFrame', str2double(app.BufferSizeDropDown.Value));
     inputDevices = app.deviceReader.getAudioDevices();
     app.InputDeviceDropDown.Items = strings(length(inputDevices), 0);
@@ -22,4 +23,5 @@ function initialise(app)
         app.InputDeviceDropDown.Value = lagStruct.inputDevice;
         app.OutputDeviceDropDown.Value = lagStruct.outputDevice;
     end
+
 end
