@@ -7,6 +7,7 @@ classdef OnsetInfoDisplayer < handle
         selectedOnset;
         playheadLoc;
         selectionRectangle;
+        selectionCircle;
     end
 
     methods
@@ -16,6 +17,7 @@ classdef OnsetInfoDisplayer < handle
             self.session = app.session;
             self.onsets = self.session.timingInfo.onsets;
             self.selectionRectangle = 0;
+            self.selectionCircle = 0;
             self.displayGlobalInfo()
             self.selectAt(playheadLoc);
         end
@@ -46,10 +48,18 @@ classdef OnsetInfoDisplayer < handle
         function displayOnsetInfo(self)
             self.app.TimeLabel.Text = sprintf('Time: %0.2f s', double(self.selectedOnset.loc) / double(self.session.fs));
             self.app.TimingLabel.Text = ['Timing: ', self.selectedOnset.timing];
-            self.app.ErrorLabel.Text = sprintf('Error: %d ms', double(self.selectedOnset.value) / double(self.session.fs) * 1000);
+            self.app.ErrorLabel.Text = sprintf('Error: %0.2f ms', double(self.selectedOnset.value) / double(self.session.fs) * 1000);
         end
 
         function drawSelectionRange(self)
+
+            if self.selectionCircle ~= 0
+                delete(self.selectionCircle)
+            end
+
+            hold(self.app.TimingPlot, 'on');
+            self.selectionCircle = plot(self.app.TimingPlot, self.selectedOnset.loc, 0, 'o', 'Color', 'g', 'MarkerSize', 20);
+            hold(self.app.TimingPlot, 'off');
 
             if self.selectionRectangle ~= 0
                 delete(self.selectionRectangle)

@@ -235,8 +235,12 @@
             % Create TimingPlot
             app.TimingPlot = uiaxes(app.ResultsTab);
             app.TimingPlot.PlotBoxAspectRatio = [1 0.310144927536232 0.310144927536232];
+            app.TimingPlot.GridColor = [0 0 0];
+            app.TimingPlot.GridAlpha = 1;
             app.TimingPlot.XTick = [];
+            app.TimingPlot.XTickLabel = {};
             app.TimingPlot.YTick = [];
+            app.TimingPlot.YTickLabel = {};
             app.TimingPlot.Position = [77 187 1046 376];
 
             % Create PlayheadSlider
@@ -250,25 +254,25 @@
             % Create NextOnsetButton
             app.NextOnsetButton = uibutton(app.ResultsTab, 'push');
             app.NextOnsetButton.ButtonPushedFcn = createCallbackFcn(app, @NextOnsetButtonPushed, true);
-            app.NextOnsetButton.Position = [156 73 100 22];
+            app.NextOnsetButton.Position = [168 108 100 22];
             app.NextOnsetButton.Text = 'Next Onset';
 
             % Create PreviousOnsetButton
             app.PreviousOnsetButton = uibutton(app.ResultsTab, 'push');
             app.PreviousOnsetButton.ButtonPushedFcn = createCallbackFcn(app, @PreviousOnsetButtonPushed, true);
-            app.PreviousOnsetButton.Position = [32 73 100 22];
+            app.PreviousOnsetButton.Position = [44 108 100 22];
             app.PreviousOnsetButton.Text = 'Previous Onset';
 
             % Create PreviousTickButton
             app.PreviousTickButton = uibutton(app.ResultsTab, 'push');
             app.PreviousTickButton.ButtonPushedFcn = createCallbackFcn(app, @PreviousTickButtonPushed, true);
-            app.PreviousTickButton.Position = [32 108 100 22];
+            app.PreviousTickButton.Position = [44 77 100 22];
             app.PreviousTickButton.Text = 'Previous Tick';
 
             % Create NextTickButton
             app.NextTickButton = uibutton(app.ResultsTab, 'push');
             app.NextTickButton.ButtonPushedFcn = createCallbackFcn(app, @NextTickButtonPushed, true);
-            app.NextTickButton.Position = [156 108 100 22];
+            app.NextTickButton.Position = [168 77 100 22];
             app.NextTickButton.Text = 'Next Tick';
 
             % Create ZoomSlider
@@ -282,8 +286,12 @@
 
             % Create TimingPlotPreview
             app.TimingPlotPreview = uiaxes(app.ResultsTab);
+            app.TimingPlotPreview.GridColor = [0 0 0];
+            app.TimingPlotPreview.GridAlpha = 1;
             app.TimingPlotPreview.XTick = [];
+            app.TimingPlotPreview.XTickLabel = {};
             app.TimingPlotPreview.YTick = [];
+            app.TimingPlotPreview.YTickLabel = {};
             app.TimingPlotPreview.Position = [77 590 1042 81];
 
             % Create PreviewPlayheadSlider

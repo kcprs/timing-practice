@@ -11,7 +11,10 @@ classdef ResultsPlot < handle
         previewPlayheadSlider;
         zoomFactor;
         initXLim;
+        initYLim;
         onsetInfoDisplayer;
+        zoomRectangle;
+        initPreviewXLim;
     end
 
     methods
@@ -27,6 +30,8 @@ classdef ResultsPlot < handle
             self.playheadLoc = 1;
             self.zoomFactor = 0;
             self.initXLim = [0, 1];
+            self.initPreviewXLim = [0, 1];
+            self.zoomRectangle = 0;
         end
 
         function plotSession(self, session)
@@ -39,19 +44,25 @@ classdef ResultsPlot < handle
 
             % Plot the preview in the top
             plot(self.previewPlot, lagCompAudioIn);
+            self.initPreviewXLim = [leftBound, rightBound];
             self.previewPlot.XLim = [leftBound, rightBound];
+            self.previewPlot.YLim = [-1, 1];
 
             % Plot the detailed plot in the main figure
             plot(self.mainPlot, lagCompAudioIn);
             hold(self.mainPlot, 'on');
-            plot(self.mainPlot, lagCompNovelty);
-            % onsetTimes = session.timingInfo.onsetLocs / session.fs;
-            plot(self.mainPlot, session.timingInfo.onsetLocs, zeros(length(session.timingInfo.onsetLocs), 1), 'x', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'r');
-            % tickTimes = session.timingInfo.tickLocs / session.fs;
-            plot(self.mainPlot, session.timingInfo.tickLocs, zeros(length(session.timingInfo.tickLocs), 1), '+', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'g');
+            % plot(self.mainPlot, lagCompNovelty);
+            % plot(self.mainPlot, session.timingInfo.onsetLocs, zeros(length(session.timingInfo.onsetLocs), 1), '+', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'g');
+            plot(self.mainPlot, session.timingInfo.tickLocs, zeros(length(session.timingInfo.tickLocs), 1), 'x', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'r');
             hold(self.mainPlot, 'off');
+
             self.mainPlot.XLim = [leftBound, rightBound];
-            session.resultsPlot.initXLim = [leftBound, rightBound];
+            self.initXLim = [leftBound, rightBound];
+            self.initYLim = self.mainPlot.YLim;
+
+            set(self.mainPlot, 'XGrid', 'on', 'XTick', self.session.timingInfo.tickLocs);
+
+
             self.movePlayhead(1);
             self.zoom(0);
         end
@@ -103,7 +114,7 @@ classdef ResultsPlot < handle
                 self.playheadSlider.Value = playheadSliderValue;
             else
                 self.zoom(self.zoomFactor);
-                self.playheadSlider.Value = (self.playheadLoc - self.mainPlot.XLim(1)) / (self.mainPlot.XLim(2) - self.mainPlot.XLim(1));
+                self.playheadSlider.Value = max(0, min(1, (self.playheadLoc - self.mainPlot.XLim(1)) / (self.mainPlot.XLim(2) - self.mainPlot.XLim(1))));
             end
 
             %% Update playhead plot
@@ -156,14 +167,29 @@ classdef ResultsPlot < handle
             rightBound = min(rightBoundPossible - leftBoundRequested + leftBoundPossible, self.initXLim(2));
 
             self.mainPlot.XLim = [leftBound, rightBound];
-            self.playheadSlider.Value = (self.playheadLoc - self.mainPlot.XLim(1)) / (self.mainPlot.XLim(2) - self.mainPlot.XLim(1));
+            self.playheadSlider.Value = max(0, min(1, (self.playheadLoc - self.mainPlot.XLim(1)) / (self.mainPlot.XLim(2) - self.mainPlot.XLim(1))));
+
+            if self.zoomRectangle ~= 0
+                delete(self.zoomRectangle);
+            end
+
+            if self.zoomFactor ~= 0
+                left = self.mainPlot.XLim(1);
+                bottom = self.previewPlot.YLim(1);
+                rectWidth = self.mainPlot.XLim(2) -self.mainPlot.XLim(1);
+                height = self.previewPlot.YLim(2) - self.previewPlot.YLim(1);
+                self.zoomRectangle = rectangle(self.previewPlot, 'Position', [left, bottom, rectWidth, height], 'EdgeColor', 'none', 'FaceColor', Colours.transparentGrey);
+            end
         end
 
         function playheadSliderMoved(self, sliderValue)
+            self.mainPlot.YLim = self.initYLim;
             self.movePlayhead(self.mainPlot.XLim(1) + sliderValue * (self.mainPlot.XLim(2) - self.mainPlot.XLim(1)));
         end
 
         function previewPlayheadSliderMoved(self, sliderValue)
+            self.previewPlot.XLim = self.initPreviewXLim;
+            self.previewPlot.YLim = [-1, 1];
             self.movePlayhead(self.previewPlot.XLim(1) + sliderValue * (self.previewPlot.XLim(2) - self.previewPlot.XLim(1)));
         end
 
