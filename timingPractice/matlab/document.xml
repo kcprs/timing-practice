@@ -2,7 +2,7 @@
 
     % Properties that correspond to app components
     properties (Access = public)
-        UIFigure                   matlab.ui.Figure
+        TimingPractice             matlab.ui.Figure
         TabGroup                   matlab.ui.container.TabGroup
         MainTab                    matlab.ui.container.Tab
         EarlyLampLabel             matlab.ui.control.Label
@@ -123,13 +123,13 @@
         % Create UIFigure and components
         function createComponents(app)
 
-            % Create UIFigure
-            app.UIFigure = uifigure;
-            app.UIFigure.Position = [100 100 1163 750];
-            app.UIFigure.Name = 'UI Figure';
+            % Create TimingPractice
+            app.TimingPractice = uifigure;
+            app.TimingPractice.Position = [100 100 1163 750];
+            app.TimingPractice.Name = 'Timing Practice';
 
             % Create TabGroup
-            app.TabGroup = uitabgroup(app.UIFigure);
+            app.TabGroup = uitabgroup(app.TimingPractice);
             app.TabGroup.Position = [1 1 1163 750];
 
             % Create MainTab
@@ -279,7 +279,7 @@
             app.ZoomSlider.Orientation = 'vertical';
             app.ZoomSlider.ValueChangedFcn = createCallbackFcn(app, @ZoomSliderValueChanged, true);
             app.ZoomSlider.MinorTicks = [];
-            app.ZoomSlider.Position = [1134 226 3 315];
+            app.ZoomSlider.Position = [1133 218 3 316];
 
             % Create TimingPlotPreview
             app.TimingPlotPreview = uiaxes(app.ResultsTab);
@@ -367,7 +367,7 @@
             createComponents(app)
 
             % Register the app with App Designer
-            registerApp(app, app.UIFigure)
+            registerApp(app, app.TimingPractice)
 
             % Execute the startup function
             runStartupFcn(app, @startupFcn)
@@ -381,7 +381,7 @@
         function delete(app)
 
             % Delete UIFigure when app is deleted
-            delete(app.UIFigure)
+            delete(app.TimingPractice)
         end
     end
 end]]></w:t></w:r></w:p></w:body></w:document>

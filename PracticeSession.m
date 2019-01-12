@@ -10,6 +10,7 @@ classdef PracticeSession < handle
         audioCursor;
         timingInfo;
         resultsPlot;
+        resultsReady;
     end
 
     methods
@@ -23,6 +24,7 @@ classdef PracticeSession < handle
                 self.timingInfo.audioLag = lagStruct.audioLag;
             end
 
+            self.resultsReady = false;
             self.resultsPlot = ResultsPlot(self, app.TimingPlot, app.TimingPlotPreview, app.PlayheadSlider, app.PreviewPlayheadSlider);
         end
 
@@ -90,7 +92,8 @@ classdef PracticeSession < handle
             self.timingInfo.cleanUp();
             self.runExtAnalysis()
 
-            %% TMP
+            %% Plot the results
+            self.resultsReady = true;
             self.resultsPlot.plotSession(self);
             app.ResultsTextArea.Value = sprintf('Average: %d\nAverage early: %d\nAverage late: %d', self.timingInfo.average, self.timingInfo.avgEarly, self.timingInfo.avgLate);
         end

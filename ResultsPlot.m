@@ -23,7 +23,7 @@ classdef ResultsPlot < handle
             self.playheadPreviewPlot = 0;
             self.playheadLoc = 0;
             self.zoomFactor = 0;
-            self.initXLim = [0, 0];
+            self.initXLim = [0, 1];
         end
 
         function plotSession(self, session)
@@ -48,9 +48,15 @@ classdef ResultsPlot < handle
             hold(self.mainPlot, 'off');
             self.mainPlot.XLim = [leftBound, rightBound];
             session.resultsPlot.initXLim = [leftBound, rightBound];
+            self.movePlayhead(1);
+            self.zoom(0);
         end
 
         function movePlayheadTo(self, direction, locType)
+            if ~self.session.resultsReady
+                return;
+            end
+
             if strcmp(locType, 'onset')
                 locs = self.session.timingInfo.onsetLocs;
             elseif strcmp(locType, 'tick')
@@ -77,6 +83,10 @@ classdef ResultsPlot < handle
         end
         
         function movePlayhead(self, sampleLoc)
+            if ~self.session.resultsReady
+                return;
+            end
+
             % Save playhead location
             self.playheadLoc = sampleLoc;
             
@@ -114,7 +124,12 @@ classdef ResultsPlot < handle
         end
 
         function zoom(self, zoomFactor)
+            if ~self.session.resultsReady
+                return;
+            end
+
             self.zoomFactor = zoomFactor;
+            self.session.app.ZoomSlider.Value = zoomFactor;
 
             initSpan = self.initXLim(2) - self.initXLim(1);
             maxZoomSpan = self.session.fs;
@@ -126,8 +141,8 @@ classdef ResultsPlot < handle
             rightBoundRequested = self.playheadLoc + currentSpan / 2;
             rightBoundPossible = min(rightBoundRequested, self.initXLim(2));
 
-            leftBound = leftBoundPossible - rightBoundRequested + rightBoundPossible;
-            rightBound = rightBoundPossible - leftBoundRequested + leftBoundPossible;
+            leftBound = max(leftBoundPossible - rightBoundRequested + rightBoundPossible, self.initXLim(1));
+            rightBound = min(rightBoundPossible - leftBoundRequested + leftBoundPossible, self.initXLim(2));
 
             self.mainPlot.XLim = [leftBound, rightBound];
             self.playheadSlider.Value = (self.playheadLoc - self.mainPlot.XLim(1)) / (self.mainPlot.XLim(2) - self.mainPlot.XLim(1));
