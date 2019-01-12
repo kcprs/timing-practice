@@ -24,6 +24,8 @@ classdef TimingInfo < handle
         lateNum;
         allNum;
         correctNum;
+        correctOnsetLocs;
+        incorrectOnsetLocs;
     end
 
     methods
@@ -82,6 +84,10 @@ classdef TimingInfo < handle
             late = 0;
             self.lateNum = 0;
             sumAll = 0;
+            self.correctOnsetLocs = zeros(0, length(self.onsets));
+            correctCursor = 1;
+            self.incorrectOnsetLocs = zeros(0, length(self.onsets));
+            incorrectCursor = 1;
 
             for iter = 1:length(self.onsetLocs)
                 onsetInfo = self.onsets(iter);
@@ -90,18 +96,43 @@ classdef TimingInfo < handle
                 if strcmp(onsetInfo.timing, 'Early')
                     early = early + onsetInfo.value;
                     self.earlyNum = self.earlyNum + 1;
+                    self.incorrectOnsetLocs(incorrectCursor) = onsetInfo.loc;
+                    incorrectCursor = incorrectCursor + 1;
                 elseif strcmp(onsetInfo.timing, 'Late')
                     late = late + onsetInfo.value;
                     self.lateNum = self.lateNum + 1;
+                    self.incorrectOnsetLocs(incorrectCursor) = onsetInfo.loc;
+                    incorrectCursor = incorrectCursor + 1;
+                else
+                    self.correctOnsetLocs(correctCursor) = onsetInfo.loc;
+                    correctCursor = correctCursor + 1;
                 end
 
             end
 
+            self.correctOnsetLocs = self.correctOnsetLocs(1:correctCursor - 1);
+            self.incorrectOnsetLocs = self.incorrectOnsetLocs(1:incorrectCursor - 1);
             self.allNum = length(self.onsets);
             self.correctNum = self.allNum - self.earlyNum - self.lateNum;
-            self.average = sumAll / self.allNum;
-            self.avgEarly = early / self.earlyNum;
-            self.avgLate = late / self.lateNum;
+
+            if self.allNum ~= 0
+                self.average = sumAll / self.allNum;
+            else
+                self.average = 0;
+            end
+
+            if self.earlyNum ~= 0
+                self.avgEarly = early / self.earlyNum;
+            else
+                self.avgEarly = 0;
+            end
+
+            if self.avgLate ~= 0
+                self.avgLate = late / self.lateNum;
+            else
+                self.avgLate = 0;
+            end
+
         end
 
     end

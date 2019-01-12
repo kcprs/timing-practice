@@ -2,7 +2,7 @@
 
     % Properties that correspond to app components
     properties (Access = public)
-        TimingPractice              matlab.ui.Figure
+        UIFigure                    matlab.ui.Figure
         TabGroup                    matlab.ui.container.TabGroup
         MainTab                     matlab.ui.container.Tab
         EarlyLampLabel              matlab.ui.control.Label
@@ -19,13 +19,10 @@
         DurationminEditFieldLabel   matlab.ui.control.Label
         DurationField               matlab.ui.control.NumericEditField
         TimingGauge                 matlab.ui.control.LinearGauge
+        DropoutWarning              matlab.ui.control.TextArea
         ResultsTab                  matlab.ui.container.Tab
         TimingPlot                  matlab.ui.control.UIAxes
         PlayheadSlider              matlab.ui.control.Slider
-        NextOnsetButton             matlab.ui.control.Button
-        PreviousOnsetButton         matlab.ui.control.Button
-        PreviousTickButton          matlab.ui.control.Button
-        NextTickButton              matlab.ui.control.Button
         ZoomSlider                  matlab.ui.control.Slider
         TimingPlotPreview           matlab.ui.control.UIAxes
         PreviewPlayheadSlider       matlab.ui.control.Slider
@@ -33,13 +30,25 @@
         TimingLabel                 matlab.ui.control.Label
         ErrorLabel                  matlab.ui.control.Label
         TimeLabel                   matlab.ui.control.Label
+        NextOnsetButton             matlab.ui.control.Button
+        PreviousOnsetButton         matlab.ui.control.Button
+        PreviousTickButton          matlab.ui.control.Button
+        NextTickButton              matlab.ui.control.Button
         GlobalResultsPanel          matlab.ui.container.Panel
         AverageErrorLabel           matlab.ui.control.Label
         AverageLateErrorLabel       matlab.ui.control.Label
         AverageEarlyErrorLabel      matlab.ui.control.Label
-        NumberOfEarlyErrorsLabel    matlab.ui.control.Label
-        NumberOfLateErrorsLabel     matlab.ui.control.Label
+        NumberOfEarlyOnsetsLabel    matlab.ui.control.Label
+        NumberOfLateOnsetsLabel     matlab.ui.control.Label
         NumberOfCorrectOnsetsLabel  matlab.ui.control.Label
+        PlaybackPanel               matlab.ui.container.Panel
+        PlayFromCursorButton        matlab.ui.control.Button
+        ResultsStopButton           matlab.ui.control.Button
+        MetronomeVolumeSliderLabel  matlab.ui.control.Label
+        MetronomeVolumeSlider       matlab.ui.control.Slider
+        RecordingVolumeSliderLabel  matlab.ui.control.Label
+        RecordingVolumeSlider       matlab.ui.control.Slider
+        StopAfterOneOnsetCheckBox   matlab.ui.control.CheckBox
         SettingsTab                 matlab.ui.container.Tab
         SystemSettingsPanel         matlab.ui.container.Panel
         SampleRateDropDownLabel     matlab.ui.control.Label
@@ -50,7 +59,11 @@
         InputDeviceDropDown         matlab.ui.control.DropDown
         OutputDeviceDropDownLabel   matlab.ui.control.Label
         OutputDeviceDropDown        matlab.ui.control.DropDown
+        AudioLagCompensationPanel   matlab.ui.container.Panel
         MeasureAudioLagButton       matlab.ui.control.Button
+        AudioLagLabel               matlab.ui.control.Label
+        AudioLagLamp                matlab.ui.control.Lamp
+        AudioLagInstruction         matlab.ui.control.TextArea
     end
 
     
@@ -71,7 +84,9 @@
         % Button pushed function: StartButton
         function StartButtonPushed(app, event)
             app.session.runPractice(app);
-            app.TabGroup.SelectedTab = app.ResultsTab;
+            if app.session.timingInfo.audioLag ~= 0
+                app.TabGroup.SelectedTab = app.ResultsTab;
+            end
         end
 
         % Button pushed function: StopButton
@@ -124,6 +139,21 @@
         function PreviewPlayheadSliderValueChanged(app, event)
             app.session.resultsPlot.previewPlayheadSliderMoved(app.PreviewPlayheadSlider.Value);            
         end
+
+        % Value changed function: BufferSizeDropDown
+        function BufferSizeDropDownValueChanged(app, event)
+            app.DropoutWarning.Visible = false;            
+        end
+
+        % Button pushed function: PlayFromCursorButton
+        function PlayFromCursorButtonPushed(app, event)
+            app.session.playFromCursor(app);
+        end
+
+        % Button pushed function: ResultsStopButton
+        function ResultsStopButtonPushed(app, event)
+            app.session.stopPlayingFromCursor(app);
+        end
     end
 
     % App initialization and construction
@@ -132,68 +162,73 @@
         % Create UIFigure and components
         function createComponents(app)
 
-            % Create TimingPractice
-            app.TimingPractice = uifigure;
-            app.TimingPractice.Position = [100 100 1163 750];
-            app.TimingPractice.Name = 'Timing Practice';
+            % Create UIFigure
+            app.UIFigure = uifigure;
+            app.UIFigure.AutoResizeChildren = 'off';
+            app.UIFigure.Position = [100 100 1163 750];
+            app.UIFigure.Name = 'Timing Practice';
+            app.UIFigure.Resize = 'off';
 
             % Create TabGroup
-            app.TabGroup = uitabgroup(app.TimingPractice);
+            app.TabGroup = uitabgroup(app.UIFigure);
+            app.TabGroup.AutoResizeChildren = 'off';
             app.TabGroup.Position = [1 1 1163 750];
 
             % Create MainTab
             app.MainTab = uitab(app.TabGroup);
+            app.MainTab.AutoResizeChildren = 'off';
             app.MainTab.Title = 'Main';
 
             % Create EarlyLampLabel
             app.EarlyLampLabel = uilabel(app.MainTab);
             app.EarlyLampLabel.HorizontalAlignment = 'right';
-            app.EarlyLampLabel.Position = [94 573 33 22];
+            app.EarlyLampLabel.Position = [95 486 33 22];
             app.EarlyLampLabel.Text = 'Early';
 
             % Create EarlyLamp
             app.EarlyLamp = uilamp(app.MainTab);
-            app.EarlyLamp.Position = [142 492 183 183];
+            app.EarlyLamp.Position = [143 405 183 183];
             app.EarlyLamp.Color = [0.902 0.902 0.902];
 
             % Create OKLampLabel
             app.OKLampLabel = uilabel(app.MainTab);
             app.OKLampLabel.HorizontalAlignment = 'right';
-            app.OKLampLabel.Position = [457 572 25 22];
+            app.OKLampLabel.Position = [458 485 25 22];
             app.OKLampLabel.Text = 'OK';
 
             % Create OKLamp
             app.OKLamp = uilamp(app.MainTab);
-            app.OKLamp.Position = [497 492 181 181];
+            app.OKLamp.Position = [498 405 181 181];
             app.OKLamp.Color = [0.902 0.902 0.902];
 
             % Create LateLampLabel
             app.LateLampLabel = uilabel(app.MainTab);
             app.LateLampLabel.HorizontalAlignment = 'right';
-            app.LateLampLabel.Position = [810 572 29 22];
+            app.LateLampLabel.Position = [811 485 29 22];
             app.LateLampLabel.Text = 'Late';
 
             % Create LateLamp
             app.LateLamp = uilamp(app.MainTab);
-            app.LateLamp.Position = [854 492 181 181];
+            app.LateLamp.Position = [855 405 181 181];
             app.LateLamp.Color = [0.902 0.902 0.902];
 
             % Create StartButton
             app.StartButton = uibutton(app.MainTab, 'push');
             app.StartButton.ButtonPushedFcn = createCallbackFcn(app, @StartButtonPushed, true);
-            app.StartButton.Position = [350 183 100 22];
+            app.StartButton.Position = [646 174 121 55];
             app.StartButton.Text = 'Start';
 
             % Create StopButton
             app.StopButton = uibutton(app.MainTab, 'push');
             app.StopButton.ButtonPushedFcn = createCallbackFcn(app, @StopButtonPushed, true);
-            app.StopButton.Position = [350 148 100 22];
+            app.StopButton.Position = [647 101 121 55];
             app.StopButton.Text = 'Stop';
 
             % Create PracticeOptionsPanel
             app.PracticeOptionsPanel = uipanel(app.MainTab);
+            app.PracticeOptionsPanel.AutoResizeChildren = 'off';
             app.PracticeOptionsPanel.Title = 'Practice Options';
-            app.PracticeOptionsPanel.Position = [62 118 243 128];
+            app.PracticeOptionsPanel.Position = [380 101 243 128];
 
             % Create TempoBPMEditFieldLabel
             app.TempoBPMEditFieldLabel = uilabel(app.PracticeOptionsPanel);
@@ -226,10 +261,19 @@
             app.TimingGauge.Limits = [-1 1];
             app.TimingGauge.ScaleColors = [1 0 0;0 1 0;1 0 0;1 0.8667 0;1 0.8706 0];
             app.TimingGauge.ScaleColorLimits = [-1 -0.5;-0.05 0.05;0.5 1;-0.5 -0.05;0.05 0.5];
-            app.TimingGauge.Position = [71 404 1021.984375 40];
+            app.TimingGauge.Position = [72 317 1021.984375 40];
+
+            % Create DropoutWarning
+            app.DropoutWarning = uitextarea(app.MainTab);
+            app.DropoutWarning.Editable = 'off';
+            app.DropoutWarning.BackgroundColor = [1 0.6392 0.6392];
+            app.DropoutWarning.Visible = 'off';
+            app.DropoutWarning.Position = [793 101 235 128];
+            app.DropoutWarning.Value = {'Audio dropouts detected. Please increase the buffer size in the "Settings" tab.'};
 
             % Create ResultsTab
             app.ResultsTab = uitab(app.TabGroup);
+            app.ResultsTab.AutoResizeChildren = 'off';
             app.ResultsTab.Title = 'Results';
 
             % Create TimingPlot
@@ -241,7 +285,7 @@
             app.TimingPlot.XTickLabel = {};
             app.TimingPlot.YTick = [];
             app.TimingPlot.YTickLabel = {};
-            app.TimingPlot.Position = [77 187 1046 376];
+            app.TimingPlot.Position = [59 253 1046 376];
 
             % Create PlayheadSlider
             app.PlayheadSlider = uislider(app.ResultsTab);
@@ -249,31 +293,7 @@
             app.PlayheadSlider.MajorTicks = [];
             app.PlayheadSlider.ValueChangedFcn = createCallbackFcn(app, @PlayheadSliderValueChanged, true);
             app.PlayheadSlider.MinorTicks = [];
-            app.PlayheadSlider.Position = [81 185 1034 3];
-
-            % Create NextOnsetButton
-            app.NextOnsetButton = uibutton(app.ResultsTab, 'push');
-            app.NextOnsetButton.ButtonPushedFcn = createCallbackFcn(app, @NextOnsetButtonPushed, true);
-            app.NextOnsetButton.Position = [168 108 100 22];
-            app.NextOnsetButton.Text = 'Next Onset';
-
-            % Create PreviousOnsetButton
-            app.PreviousOnsetButton = uibutton(app.ResultsTab, 'push');
-            app.PreviousOnsetButton.ButtonPushedFcn = createCallbackFcn(app, @PreviousOnsetButtonPushed, true);
-            app.PreviousOnsetButton.Position = [44 108 100 22];
-            app.PreviousOnsetButton.Text = 'Previous Onset';
-
-            % Create PreviousTickButton
-            app.PreviousTickButton = uibutton(app.ResultsTab, 'push');
-            app.PreviousTickButton.ButtonPushedFcn = createCallbackFcn(app, @PreviousTickButtonPushed, true);
-            app.PreviousTickButton.Position = [44 77 100 22];
-            app.PreviousTickButton.Text = 'Previous Tick';
-
-            % Create NextTickButton
-            app.NextTickButton = uibutton(app.ResultsTab, 'push');
-            app.NextTickButton.ButtonPushedFcn = createCallbackFcn(app, @NextTickButtonPushed, true);
-            app.NextTickButton.Position = [168 77 100 22];
-            app.NextTickButton.Text = 'Next Tick';
+            app.PlayheadSlider.Position = [63 267 1038 3];
 
             % Create ZoomSlider
             app.ZoomSlider = uislider(app.ResultsTab);
@@ -282,7 +302,7 @@
             app.ZoomSlider.Orientation = 'vertical';
             app.ZoomSlider.ValueChangedFcn = createCallbackFcn(app, @ZoomSliderValueChanged, true);
             app.ZoomSlider.MinorTicks = [];
-            app.ZoomSlider.Position = [1133 218 3 316];
+            app.ZoomSlider.Position = [1115 281 3 320];
 
             % Create TimingPlotPreview
             app.TimingPlotPreview = uiaxes(app.ResultsTab);
@@ -292,7 +312,7 @@
             app.TimingPlotPreview.XTickLabel = {};
             app.TimingPlotPreview.YTick = [];
             app.TimingPlotPreview.YTickLabel = {};
-            app.TimingPlotPreview.Position = [77 590 1042 81];
+            app.TimingPlotPreview.Position = [59 616 1046 81];
 
             % Create PreviewPlayheadSlider
             app.PreviewPlayheadSlider = uislider(app.ResultsTab);
@@ -300,123 +320,225 @@
             app.PreviewPlayheadSlider.MajorTicks = [];
             app.PreviewPlayheadSlider.ValueChangedFcn = createCallbackFcn(app, @PreviewPlayheadSliderValueChanged, true);
             app.PreviewPlayheadSlider.MinorTicks = [];
-            app.PreviewPlayheadSlider.Position = [81 682 1031 3];
+            app.PreviewPlayheadSlider.Position = [63 699 1034 3];
 
             % Create SelectedOnsetResultsPanel
             app.SelectedOnsetResultsPanel = uipanel(app.ResultsTab);
+            app.SelectedOnsetResultsPanel.AutoResizeChildren = 'off';
             app.SelectedOnsetResultsPanel.Title = 'Selected Onset Results';
-            app.SelectedOnsetResultsPanel.Position = [317 24 281 139];
+            app.SelectedOnsetResultsPanel.Position = [63 25 232 221];
 
             % Create TimingLabel
             app.TimingLabel = uilabel(app.SelectedOnsetResultsPanel);
-            app.TimingLabel.Position = [15 51 249 22];
+            app.TimingLabel.Position = [15 133 203 22];
             app.TimingLabel.Text = 'Timing:';
 
             % Create ErrorLabel
             app.ErrorLabel = uilabel(app.SelectedOnsetResultsPanel);
-            app.ErrorLabel.Position = [15 18 249 22];
+            app.ErrorLabel.Position = [15 100 203 22];
             app.ErrorLabel.Text = 'Error:';
 
             % Create TimeLabel
             app.TimeLabel = uilabel(app.SelectedOnsetResultsPanel);
-            app.TimeLabel.Position = [15 84 249 22];
+            app.TimeLabel.Position = [15 166 203 22];
             app.TimeLabel.Text = 'Time:';
+
+            % Create NextOnsetButton
+            app.NextOnsetButton = uibutton(app.SelectedOnsetResultsPanel, 'push');
+            app.NextOnsetButton.ButtonPushedFcn = createCallbackFcn(app, @NextOnsetButtonPushed, true);
+            app.NextOnsetButton.Position = [121 54 100 32];
+            app.NextOnsetButton.Text = 'Next Onset';
+
+            % Create PreviousOnsetButton
+            app.PreviousOnsetButton = uibutton(app.SelectedOnsetResultsPanel, 'push');
+            app.PreviousOnsetButton.ButtonPushedFcn = createCallbackFcn(app, @PreviousOnsetButtonPushed, true);
+            app.PreviousOnsetButton.Position = [9 54 100 32];
+            app.PreviousOnsetButton.Text = 'Previous Onset';
+
+            % Create PreviousTickButton
+            app.PreviousTickButton = uibutton(app.SelectedOnsetResultsPanel, 'push');
+            app.PreviousTickButton.ButtonPushedFcn = createCallbackFcn(app, @PreviousTickButtonPushed, true);
+            app.PreviousTickButton.Position = [9 13 100 32];
+            app.PreviousTickButton.Text = 'Previous Tick';
+
+            % Create NextTickButton
+            app.NextTickButton = uibutton(app.SelectedOnsetResultsPanel, 'push');
+            app.NextTickButton.ButtonPushedFcn = createCallbackFcn(app, @NextTickButtonPushed, true);
+            app.NextTickButton.Position = [121 13 100 32];
+            app.NextTickButton.Text = 'Next Tick';
 
             % Create GlobalResultsPanel
             app.GlobalResultsPanel = uipanel(app.ResultsTab);
+            app.GlobalResultsPanel.AutoResizeChildren = 'off';
             app.GlobalResultsPanel.Title = 'Global Results';
-            app.GlobalResultsPanel.Position = [659 24 464 139];
+            app.GlobalResultsPanel.Position = [326 107 439 139];
 
             % Create AverageErrorLabel
             app.AverageErrorLabel = uilabel(app.GlobalResultsPanel);
-            app.AverageErrorLabel.Position = [16 84 198 22];
+            app.AverageErrorLabel.Position = [16 84 184 22];
             app.AverageErrorLabel.Text = 'Average Error:';
 
             % Create AverageLateErrorLabel
             app.AverageLateErrorLabel = uilabel(app.GlobalResultsPanel);
-            app.AverageLateErrorLabel.Position = [16 18 198 22];
+            app.AverageLateErrorLabel.Position = [16 18 184 22];
             app.AverageLateErrorLabel.Text = 'Average Late Error:';
 
             % Create AverageEarlyErrorLabel
             app.AverageEarlyErrorLabel = uilabel(app.GlobalResultsPanel);
-            app.AverageEarlyErrorLabel.Position = [16 51 198 22];
+            app.AverageEarlyErrorLabel.Position = [16 51 184 22];
             app.AverageEarlyErrorLabel.Text = 'Average Early Error:';
 
-            % Create NumberOfEarlyErrorsLabel
-            app.NumberOfEarlyErrorsLabel = uilabel(app.GlobalResultsPanel);
-            app.NumberOfEarlyErrorsLabel.Position = [241 51 202 22];
-            app.NumberOfEarlyErrorsLabel.Text = 'Number Of Early Errors:';
+            % Create NumberOfEarlyOnsetsLabel
+            app.NumberOfEarlyOnsetsLabel = uilabel(app.GlobalResultsPanel);
+            app.NumberOfEarlyOnsetsLabel.Position = [213 51 202 22];
+            app.NumberOfEarlyOnsetsLabel.Text = 'Number Of Early Onsets:';
 
-            % Create NumberOfLateErrorsLabel
-            app.NumberOfLateErrorsLabel = uilabel(app.GlobalResultsPanel);
-            app.NumberOfLateErrorsLabel.Position = [241 18 202 22];
-            app.NumberOfLateErrorsLabel.Text = 'Number Of Late Errors:';
+            % Create NumberOfLateOnsetsLabel
+            app.NumberOfLateOnsetsLabel = uilabel(app.GlobalResultsPanel);
+            app.NumberOfLateOnsetsLabel.Position = [213 18 202 22];
+            app.NumberOfLateOnsetsLabel.Text = 'Number Of Late Onsets:';
 
             % Create NumberOfCorrectOnsetsLabel
             app.NumberOfCorrectOnsetsLabel = uilabel(app.GlobalResultsPanel);
-            app.NumberOfCorrectOnsetsLabel.Position = [241 84 202 22];
+            app.NumberOfCorrectOnsetsLabel.Position = [213 84 202 22];
             app.NumberOfCorrectOnsetsLabel.Text = 'Number Of Correct Onsets:';
+
+            % Create PlaybackPanel
+            app.PlaybackPanel = uipanel(app.ResultsTab);
+            app.PlaybackPanel.AutoResizeChildren = 'off';
+            app.PlaybackPanel.Title = 'Playback';
+            app.PlaybackPanel.Position = [784 25 313 222];
+
+            % Create PlayFromCursorButton
+            app.PlayFromCursorButton = uibutton(app.PlaybackPanel, 'push');
+            app.PlayFromCursorButton.ButtonPushedFcn = createCallbackFcn(app, @PlayFromCursorButtonPushed, true);
+            app.PlayFromCursorButton.Position = [20 133 132 55];
+            app.PlayFromCursorButton.Text = 'Play From Cursor';
+
+            % Create ResultsStopButton
+            app.ResultsStopButton = uibutton(app.PlaybackPanel, 'push');
+            app.ResultsStopButton.ButtonPushedFcn = createCallbackFcn(app, @ResultsStopButtonPushed, true);
+            app.ResultsStopButton.Position = [165 133 132 55];
+            app.ResultsStopButton.Text = 'Stop';
+
+            % Create MetronomeVolumeSliderLabel
+            app.MetronomeVolumeSliderLabel = uilabel(app.PlaybackPanel);
+            app.MetronomeVolumeSliderLabel.Position = [20 15 110 22];
+            app.MetronomeVolumeSliderLabel.Text = 'Metronome Volume';
+
+            % Create MetronomeVolumeSlider
+            app.MetronomeVolumeSlider = uislider(app.PlaybackPanel);
+            app.MetronomeVolumeSlider.Limits = [0 1];
+            app.MetronomeVolumeSlider.MajorTicks = [];
+            app.MetronomeVolumeSlider.MinorTicks = [];
+            app.MetronomeVolumeSlider.Position = [151 24 141 3];
+            app.MetronomeVolumeSlider.Value = 1;
+
+            % Create RecordingVolumeSliderLabel
+            app.RecordingVolumeSliderLabel = uilabel(app.PlaybackPanel);
+            app.RecordingVolumeSliderLabel.Position = [21 54 111 22];
+            app.RecordingVolumeSliderLabel.Text = 'Recording Volume';
+
+            % Create RecordingVolumeSlider
+            app.RecordingVolumeSlider = uislider(app.PlaybackPanel);
+            app.RecordingVolumeSlider.Limits = [0 1];
+            app.RecordingVolumeSlider.MajorTicks = [];
+            app.RecordingVolumeSlider.MinorTicks = [];
+            app.RecordingVolumeSlider.Position = [151 63 142 3];
+            app.RecordingVolumeSlider.Value = 1;
+
+            % Create StopAfterOneOnsetCheckBox
+            app.StopAfterOneOnsetCheckBox = uicheckbox(app.PlaybackPanel);
+            app.StopAfterOneOnsetCheckBox.Text = 'Stop After One Onset';
+            app.StopAfterOneOnsetCheckBox.Position = [20 91 146 22];
+            app.StopAfterOneOnsetCheckBox.Value = true;
 
             % Create SettingsTab
             app.SettingsTab = uitab(app.TabGroup);
+            app.SettingsTab.AutoResizeChildren = 'off';
             app.SettingsTab.Title = 'Settings';
 
             % Create SystemSettingsPanel
             app.SystemSettingsPanel = uipanel(app.SettingsTab);
+            app.SystemSettingsPanel.AutoResizeChildren = 'off';
             app.SystemSettingsPanel.Title = 'System Settings';
-            app.SystemSettingsPanel.Position = [389 461 716 220];
+            app.SystemSettingsPanel.Position = [389 424 716 257];
 
             % Create SampleRateDropDownLabel
             app.SampleRateDropDownLabel = uilabel(app.SystemSettingsPanel);
             app.SampleRateDropDownLabel.HorizontalAlignment = 'right';
-            app.SampleRateDropDownLabel.Position = [24 69 75 22];
+            app.SampleRateDropDownLabel.Position = [27 76 75 22];
             app.SampleRateDropDownLabel.Text = 'Sample Rate';
 
             % Create SampleRateDropDown
             app.SampleRateDropDown = uidropdown(app.SystemSettingsPanel);
             app.SampleRateDropDown.Items = {'44100', '48000'};
-            app.SampleRateDropDown.Position = [120 69 101 22];
+            app.SampleRateDropDown.Position = [123 76 101 22];
             app.SampleRateDropDown.Value = '44100';
 
             % Create BufferSizeDropDownLabel
             app.BufferSizeDropDownLabel = uilabel(app.SystemSettingsPanel);
             app.BufferSizeDropDownLabel.HorizontalAlignment = 'right';
-            app.BufferSizeDropDownLabel.Position = [24 27 64 22];
+            app.BufferSizeDropDownLabel.Position = [27 19 64 22];
             app.BufferSizeDropDownLabel.Text = 'Buffer Size';
 
             % Create BufferSizeDropDown
             app.BufferSizeDropDown = uidropdown(app.SystemSettingsPanel);
             app.BufferSizeDropDown.Items = {'128', '256', '512', '1024'};
-            app.BufferSizeDropDown.Position = [120 27 101 22];
+            app.BufferSizeDropDown.ValueChangedFcn = createCallbackFcn(app, @BufferSizeDropDownValueChanged, true);
+            app.BufferSizeDropDown.Position = [123 19 101 22];
             app.BufferSizeDropDown.Value = '512';
 
             % Create InputDeviceDropDownLabel
             app.InputDeviceDropDownLabel = uilabel(app.SystemSettingsPanel);
             app.InputDeviceDropDownLabel.HorizontalAlignment = 'right';
-            app.InputDeviceDropDownLabel.Position = [24 153 72 22];
+            app.InputDeviceDropDownLabel.Position = [27 192 72 22];
             app.InputDeviceDropDownLabel.Text = 'Input Device';
 
             % Create InputDeviceDropDown
             app.InputDeviceDropDown = uidropdown(app.SystemSettingsPanel);
             app.InputDeviceDropDown.ValueChangedFcn = createCallbackFcn(app, @IODeviceChanged, true);
-            app.InputDeviceDropDown.Position = [121 153 565 22];
+            app.InputDeviceDropDown.Position = [124 192 565 22];
 
             % Create OutputDeviceDropDownLabel
             app.OutputDeviceDropDownLabel = uilabel(app.SystemSettingsPanel);
             app.OutputDeviceDropDownLabel.HorizontalAlignment = 'right';
-            app.OutputDeviceDropDownLabel.Position = [24 111 82 22];
+            app.OutputDeviceDropDownLabel.Position = [27 134 82 22];
             app.OutputDeviceDropDownLabel.Text = 'Output Device';
 
             % Create OutputDeviceDropDown
             app.OutputDeviceDropDown = uidropdown(app.SystemSettingsPanel);
             app.OutputDeviceDropDown.ValueChangedFcn = createCallbackFcn(app, @IODeviceChanged, true);
-            app.OutputDeviceDropDown.Position = [121 111 565 22];
+            app.OutputDeviceDropDown.Position = [124 134 565 22];
+
+            % Create AudioLagCompensationPanel
+            app.AudioLagCompensationPanel = uipanel(app.SettingsTab);
+            app.AudioLagCompensationPanel.AutoResizeChildren = 'off';
+            app.AudioLagCompensationPanel.Title = 'Audio Lag Compensation';
+            app.AudioLagCompensationPanel.Position = [43 424 334 257];
 
             % Create MeasureAudioLagButton
-            app.MeasureAudioLagButton = uibutton(app.SettingsTab, 'push');
+            app.MeasureAudioLagButton = uibutton(app.AudioLagCompensationPanel, 'push');
             app.MeasureAudioLagButton.ButtonPushedFcn = createCallbackFcn(app, @MeasureAudioLagButtonPushed, true);
-            app.MeasureAudioLagButton.Position = [113 551 120 22];
+            app.MeasureAudioLagButton.Position = [15 89 304 46];
             app.MeasureAudioLagButton.Text = 'Measure Audio Lag';
+
+            % Create AudioLagLabel
+            app.AudioLagLabel = uilabel(app.AudioLagCompensationPanel);
+            app.AudioLagLabel.Position = [133 34 132 22];
+            app.AudioLagLabel.Text = 'Audio lag not measured';
+
+            % Create AudioLagLamp
+            app.AudioLagLamp = uilamp(app.AudioLagCompensationPanel);
+            app.AudioLagLamp.Position = [55 13 64 64];
+            app.AudioLagLamp.Color = [1 0 0];
+
+            % Create AudioLagInstruction
+            app.AudioLagInstruction = uitextarea(app.AudioLagCompensationPanel);
+            app.AudioLagInstruction.Editable = 'off';
+            app.AudioLagInstruction.HorizontalAlignment = 'center';
+            app.AudioLagInstruction.Position = [15 147 304 79];
+            app.AudioLagInstruction.Value = {'Before measuring audio lag, please make sure the signal played from the speakers of your system will be picked up by the microphone of your system. Once measured, the value will be stored and reused even after the app is closed.'};
         end
     end
 
@@ -429,7 +551,7 @@
             createComponents(app)
 
             % Register the app with App Designer
-            registerApp(app, app.TimingPractice)
+            registerApp(app, app.UIFigure)
 
             % Execute the startup function
             runStartupFcn(app, @startupFcn)
@@ -443,7 +565,7 @@
         function delete(app)
 
             % Delete UIFigure when app is deleted
-            delete(app.TimingPractice)
+            delete(app.UIFigure)
         end
     end
 end]]></w:t></w:r></w:p></w:body></w:document>

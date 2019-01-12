@@ -37,11 +37,11 @@ classdef OnsetInfoDisplayer < handle
         end
 
         function displayGlobalInfo(self)
-            self.app.AverageErrorLabel.Text = sprintf('Average error: %0.2f ms', self.session.timingInfo.average / self.session.fs * 1000);
-            self.app.AverageLateErrorLabel.Text = sprintf('Average late error: %0.2f ms', self.session.timingInfo.avgLate / self.session.fs * 1000);
-            self.app.AverageEarlyErrorLabel.Text = sprintf('Averge early error: %0.2f ms', self.session.timingInfo.avgEarly / self.session.fs * 1000);
-            self.app.NumberOfEarlyErrorsLabel.Text = sprintf('Number of early errors: %d', self.session.timingInfo.earlyNum);
-            self.app.NumberOfLateErrorsLabel.Text = sprintf('Number of late errors: %d', self.session.timingInfo.lateNum);
+            self.app.AverageErrorLabel.Text = sprintf('Average error: %0.2f ms', double(self.session.timingInfo.average) / double(self.session.fs) * 1000);
+            self.app.AverageLateErrorLabel.Text = sprintf('Average late error: %0.2f ms', double(self.session.timingInfo.avgLate) / double(self.session.fs) * 1000);
+            self.app.AverageEarlyErrorLabel.Text = sprintf('Averge early error: %0.2f ms', double(self.session.timingInfo.avgEarly) / double(self.session.fs) * 1000);
+            self.app.NumberOfEarlyOnsetsLabel.Text = sprintf('Number of early onsets: %d', self.session.timingInfo.earlyNum);
+            self.app.NumberOfLateOnsetsLabel.Text = sprintf('Number of late onsets: %d', self.session.timingInfo.lateNum);
             self.app.NumberOfCorrectOnsetsLabel.Text = sprintf('Number of correct onsets: %d', self.session.timingInfo.correctNum);
         end
 
@@ -58,7 +58,7 @@ classdef OnsetInfoDisplayer < handle
             end
 
             hold(self.app.TimingPlot, 'on');
-            self.selectionCircle = plot(self.app.TimingPlot, self.selectedOnset.loc, 0, 'o', 'Color', 'g', 'MarkerSize', 20);
+            self.selectionCircle = plot(self.app.TimingPlot, self.selectedOnset.loc, 0, 'o', 'Color', 'k', 'MarkerSize', 20);
             hold(self.app.TimingPlot, 'off');
 
             if self.selectionRectangle ~= 0

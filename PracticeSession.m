@@ -11,6 +11,8 @@ classdef PracticeSession < handle
         timingInfo;
         resultsPlot;
         resultsReady;
+        measuringLag;
+        lagCompAudioIn;
     end
 
     methods
@@ -22,10 +24,13 @@ classdef PracticeSession < handle
             if exist('resources/audioLag.mat', 'file')
                 lagStruct = load('resources/audioLag.mat');
                 self.timingInfo.audioLag = lagStruct.audioLag;
+                self.app.AudioLagLabel.Text = sprintf('Audio lag: %d samples', self.timingInfo.audioLag);
+                self.app.AudioLagLamp.Color = Colours.green;
             end
 
             self.resultsReady = false;
             self.resultsPlot = ResultsPlot(self, app.TimingPlot, app.TimingPlotPreview, app.PlayheadSlider, app.PreviewPlayheadSlider);
+            self.measuringLag = false;
         end
 
         function prepare(self, app)
@@ -50,11 +55,11 @@ classdef PracticeSession < handle
             if ~isempty(self.timingInfo.onsets)
                 recentError = self.timingInfo.onsets(self.timingInfo.onsetInfoCursor - 1);
 
-                if strcmp(recentError.timing, 'early')
+                if strcmp(recentError.timing, 'Early')
                     self.app.EarlyLamp.Color = Colours.red;
                     self.app.OKLamp.Color = Colours.grey;
                     self.app.LateLamp.Color = Colours.grey;
-                elseif strcmp(recentError.timing, 'late')
+                elseif strcmp(recentError.timing, 'Late')
                     self.app.EarlyLamp.Color = Colours.grey;
                     self.app.OKLamp.Color = Colours.grey;
                     self.app.LateLamp.Color = Colours.red;
@@ -70,6 +75,12 @@ classdef PracticeSession < handle
         end
 
         function runPractice(self, app)
+
+            if self.timingInfo.audioLag == 0 && not(self.measuringLag)
+                msgbox('No previously saved information about your system latency was found. Before starting the session, measure the audio lag of your system. You can do that from the "Settings" tab.');
+                return;
+            end
+
             %% Setup player
             self.prepare(app);
             app.player = audioplayer(self.metronome.audio, str2double(app.SampleRateDropDown.Value), 16, app.OutputDeviceDropDown.Value);
@@ -88,14 +99,14 @@ classdef PracticeSession < handle
             %% Release resources
             release(app.deviceReader);
 
-            self.timingInfo.analyseRemaining();
-            self.timingInfo.cleanUp();
-            self.runExtAnalysis()
+            self.cleanUp();
+            self.runExtAnalysis();
 
             %% Plot the results
             self.resultsReady = true;
             self.resultsPlot.plotSession(self);
         end
+
 
         function stopPractice(~, app)
             stop(app.player);
@@ -109,8 +120,7 @@ classdef PracticeSession < handle
                 [audioFrame, numOverrun] = app.deviceReader();
 
                 if numOverrun ~= 0
-                    disp('Overrun');
-                    disp(numOverrun);
+                    app.DropoutWarning.Visible = true;
                 end
 
                 self.addFrame([zeros(numOverrun, 1); audioFrame]);
@@ -130,6 +140,7 @@ classdef PracticeSession < handle
         end
 
         function measureAudioLag(self, app)
+            self.measuringLag = true;
             app.UIFigure.Visible = 'off';
             multiWaitbar('Measuring average audio lag...');
             setTempo = app.TempoField.Value;
@@ -160,15 +171,65 @@ classdef PracticeSession < handle
             app.LateLamp.Color = Colours.grey;
             app.TimingGauge.Value = 0;
             app.UIFigure.Visible = 'on';
-            app.TabGroup.SelectedTab = app.MainTab;
             cla(app.TimingPlot);
-            app.ResultsTextArea.Value = '';
             multiWaitbar('Measuring average audio lag...', 'Close');
+            self.app.AudioLagLabel.Text = sprintf('Audio lag: %d samples', self.timingInfo.audioLag);
+            self.app.AudioLagLamp.Color = Colours.green;
+            self.measuringLag = false;
+        end
+
+        
+        function cleanUp(self)
+            self.audioIn = self.audioIn(1:self.audioCursor);
+            self.timingInfo.analyseRemaining();
+            self.timingInfo.cleanUp();
+            self.lagCompAudioIn = self.audioIn(self.timingInfo.audioLag + 1:end);
         end
 
         function runExtAnalysis(self)
-            self.timingInfo.cleanUp();
             self.timingInfo.runExtAnalysis();
+        end
+
+        function playFromCursor(self, app)
+
+            if ~self.resultsReady
+                return;
+            end
+
+            app.RecordingVolumeSlider.Enable = false;
+            app.MetronomeVolumeSlider.Enable = false;
+
+            if length(self.metronome.audio) > length(self.lagCompAudioIn)
+                alignedMetro = self.metronome.audio(1:length(self.lagCompAudioIn));
+            end
+
+            if length(self.metronome.audio) < length(self.lagCompAudioIn)
+                alignedMetro = [self.metronome.audio; zeros(length(self.lagCompAudioIn) - length(self.metronome.audio), 1)];
+            end
+
+            if app.StopAfterOneOnsetCheckBox.Value
+                cursor = 1;
+
+                while cursor <= length(self.timingInfo.onsets) && self.timingInfo.onsets(cursor).loc < self.resultsPlot.playheadLoc
+                    cursor = cursor + 1;
+                end
+
+                stopIndex = self.timingInfo.onsets(cursor + 1).loc;
+
+                toPlay = app.RecordingVolumeSlider.Value^2 * self.lagCompAudioIn(int64(self.resultsPlot.playheadLoc):stopIndex) + app.MetronomeVolumeSlider.Value^2 * alignedMetro(int64(self.resultsPlot.playheadLoc):stopIndex);
+            else
+                toPlay = app.RecordingVolumeSlider.Value^2 * self.lagCompAudioIn(int64(self.resultsPlot.playheadLoc):end) + app.MetronomeVolumeSlider.Value^2 * alignedMetro(int64(self.resultsPlot.playheadLoc):end);
+            end
+            app.player = audioplayer(toPlay, str2double(app.SampleRateDropDown.Value), 16, app.OutputDeviceDropDown.Value);
+            set(app.player, 'StopFcn', @reactivateVolumeSlidersCallback);
+            set(app.player, 'UserData', app);
+            play(app.player);
+        end
+
+        function stopPlayingFromCursor(~, app)
+            stop(app.player);
+            app.RecordingVolumeSlider.Enable = true;
+            app.MetronomeVolumeSlider.Enable = true;
         end
 
     end

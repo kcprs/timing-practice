@@ -36,24 +36,22 @@ classdef ResultsPlot < handle
 
         function plotSession(self, session)
             self.onsetInfoDisplayer = OnsetInfoDisplayer(session.app, self.playheadLoc);
-            lagCompAudioIn = session.audioIn(session.timingInfo.audioLag + 1:end);
-            lagCompNovelty = session.timingInfo.novelty(session.timingInfo.audioLag + 1:end);
+            % lagCompNovelty = session.timingInfo.novelty(session.timingInfo.audioLag + 1:end);
             % time = linspace(0, length(lagCompAudioIn) / session.fs, length(lagCompAudioIn));
             leftBound = 0;
-            rightBound = max(length(lagCompAudioIn), length(lagCompNovelty));
+            rightBound = length(session.lagCompAudioIn);
 
             % Plot the preview in the top
-            plot(self.previewPlot, lagCompAudioIn);
+            plot(self.previewPlot, session.lagCompAudioIn);
             self.initPreviewXLim = [leftBound, rightBound];
             self.previewPlot.XLim = [leftBound, rightBound];
             self.previewPlot.YLim = [-1, 1];
 
             % Plot the detailed plot in the main figure
-            plot(self.mainPlot, lagCompAudioIn);
+            plot(self.mainPlot, session.lagCompAudioIn);
             hold(self.mainPlot, 'on');
-            % plot(self.mainPlot, lagCompNovelty);
-            % plot(self.mainPlot, session.timingInfo.onsetLocs, zeros(length(session.timingInfo.onsetLocs), 1), '+', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'g');
-            plot(self.mainPlot, session.timingInfo.tickLocs, zeros(length(session.timingInfo.tickLocs), 1), 'x', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'r');
+            plot(self.mainPlot, session.timingInfo.correctOnsetLocs, zeros(length(session.timingInfo.correctOnsetLocs), 1), 'x', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'g');
+            plot(self.mainPlot, session.timingInfo.incorrectOnsetLocs, zeros(length(session.timingInfo.incorrectOnsetLocs), 1), 'x', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'r');
             hold(self.mainPlot, 'off');
 
             self.mainPlot.XLim = [leftBound, rightBound];
@@ -104,6 +102,11 @@ classdef ResultsPlot < handle
                 return;
             end
 
+            % If the user accidentally scrolled the plots by clicking and dragging within the plot, reset limits
+            self.previewPlot.XLim = self.initPreviewXLim;
+            self.previewPlot.YLim = [-1, 1];
+            self.mainPlot.YLim = self.initYLim;
+
             % Save playhead location
             self.playheadLoc = sampleLoc;
 
@@ -150,6 +153,11 @@ classdef ResultsPlot < handle
                 return;
             end
 
+            % If the user accidentally scrolled the plots by clicking and dragging within the plot, reset limits
+            self.previewPlot.XLim = self.initPreviewXLim;
+            self.previewPlot.YLim = [-1, 1];
+            self.mainPlot.YLim = self.initYLim;
+
             self.zoomFactor = zoomFactor;
             self.session.app.ZoomSlider.Value = zoomFactor;
 
@@ -183,13 +191,10 @@ classdef ResultsPlot < handle
         end
 
         function playheadSliderMoved(self, sliderValue)
-            self.mainPlot.YLim = self.initYLim;
             self.movePlayhead(self.mainPlot.XLim(1) + sliderValue * (self.mainPlot.XLim(2) - self.mainPlot.XLim(1)));
         end
 
         function previewPlayheadSliderMoved(self, sliderValue)
-            self.previewPlot.XLim = self.initPreviewXLim;
-            self.previewPlot.YLim = [-1, 1];
             self.movePlayhead(self.previewPlot.XLim(1) + sliderValue * (self.previewPlot.XLim(2) - self.previewPlot.XLim(1)));
         end
 
