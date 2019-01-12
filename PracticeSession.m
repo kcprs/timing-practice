@@ -23,7 +23,7 @@ classdef PracticeSession < handle
                 self.timingInfo.audioLag = lagStruct.audioLag;
             end
 
-            self.resultsPlot = ResultsPlot(self, app.TimingPlot, app.PlayheadSlider);
+            self.resultsPlot = ResultsPlot(self, app.TimingPlot, app.TimingPlotPreview, app.PlayheadSlider, app.PreviewPlayheadSlider);
         end
 
         function prepare(self, app)
@@ -91,7 +91,7 @@ classdef PracticeSession < handle
             self.runExtAnalysis()
 
             %% TMP
-            self.plot(app.TimingPlot);
+            self.resultsPlot.plotSession(self);
             app.ResultsTextArea.Value = sprintf('Average: %d\nAverage early: %d\nAverage late: %d', self.timingInfo.average, self.timingInfo.avgEarly, self.timingInfo.avgLate);
         end
 
@@ -167,21 +167,6 @@ classdef PracticeSession < handle
         function runExtAnalysis(self)
             self.timingInfo.cleanUp();
             self.timingInfo.runExtAnalysis();
-        end
-
-        function plot(self, ax)% TODO: Move to ResultsPlot
-            lagCompAudioIn = self.audioIn(self.timingInfo.audioLag + 1:end);
-            lagCompNovelty = self.timingInfo.novelty(self.timingInfo.audioLag + 1:end);
-            time = linspace(0, length(lagCompAudioIn) / self.fs, length(lagCompAudioIn));
-            plot(ax, time, lagCompAudioIn);
-            hold(ax, 'on');
-            plot(ax, time, lagCompNovelty);
-            onsetTimes = self.timingInfo.onsetLocs / self.fs;
-            plot(ax, onsetTimes, zeros(length(onsetTimes), 1), 'x', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'r');
-            tickTimes = self.timingInfo.tickLocs / self.fs;
-            plot(ax, tickTimes, zeros(length(tickTimes), 1), '+', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'g');
-            hold(ax, 'off');
-            self.resultsPlot.initXLim = ax.XLim;
         end
 
     end

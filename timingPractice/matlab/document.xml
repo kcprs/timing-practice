@@ -29,6 +29,8 @@
         ResultsTextAreaLabel       matlab.ui.control.Label
         ResultsTextArea            matlab.ui.control.TextArea
         ZoomSlider                 matlab.ui.control.Slider
+        TimingPlotPreview          matlab.ui.control.UIAxes
+        PreviewPlayheadSlider      matlab.ui.control.Slider
         SettingsTab                matlab.ui.container.Tab
         SystemSettingsPanel        matlab.ui.container.Panel
         SampleRateDropDownLabel    matlab.ui.control.Label
@@ -107,6 +109,11 @@
         % OutputDeviceDropDown
         function IODeviceChanged(app, event)
             saveIoSettings(app);
+        end
+
+        % Value changed function: PreviewPlayheadSlider
+        function PreviewPlayheadSliderValueChanged(app, event)
+            app.session.resultsPlot.previewPlayheadSliderMoved(app.PreviewPlayheadSlider.Value);            
         end
     end
 
@@ -218,11 +225,10 @@
 
             % Create TimingPlot
             app.TimingPlot = uiaxes(app.ResultsTab);
-            title(app.TimingPlot, 'Title')
-            xlabel(app.TimingPlot, 'X')
-            ylabel(app.TimingPlot, 'Y')
             app.TimingPlot.PlotBoxAspectRatio = [1 0.310144927536232 0.310144927536232];
-            app.TimingPlot.Position = [17 324 1082 376];
+            app.TimingPlot.XTick = [];
+            app.TimingPlot.YTick = [];
+            app.TimingPlot.Position = [77 187 1046 376];
 
             % Create PlayheadSlider
             app.PlayheadSlider = uislider(app.ResultsTab);
@@ -230,41 +236,41 @@
             app.PlayheadSlider.MajorTicks = [];
             app.PlayheadSlider.ValueChangedFcn = createCallbackFcn(app, @PlayheadSliderValueChanged, true);
             app.PlayheadSlider.MinorTicks = [];
-            app.PlayheadSlider.Position = [57 322 1034 3];
+            app.PlayheadSlider.Position = [81 185 1034 3];
 
             % Create NextOnsetButton
             app.NextOnsetButton = uibutton(app.ResultsTab, 'push');
             app.NextOnsetButton.ButtonPushedFcn = createCallbackFcn(app, @NextOnsetButtonPushed, true);
-            app.NextOnsetButton.Position = [469 137 100 22];
+            app.NextOnsetButton.Position = [479 74 100 22];
             app.NextOnsetButton.Text = 'Next Onset';
 
             % Create PreviousOnsetButton
             app.PreviousOnsetButton = uibutton(app.ResultsTab, 'push');
             app.PreviousOnsetButton.ButtonPushedFcn = createCallbackFcn(app, @PreviousOnsetButtonPushed, true);
-            app.PreviousOnsetButton.Position = [345 137 100 22];
+            app.PreviousOnsetButton.Position = [355 74 100 22];
             app.PreviousOnsetButton.Text = 'Previous Onset';
 
             % Create PreviousTickButton
             app.PreviousTickButton = uibutton(app.ResultsTab, 'push');
             app.PreviousTickButton.ButtonPushedFcn = createCallbackFcn(app, @PreviousTickButtonPushed, true);
-            app.PreviousTickButton.Position = [345 172 100 22];
+            app.PreviousTickButton.Position = [355 109 100 22];
             app.PreviousTickButton.Text = 'Previous Tick';
 
             % Create NextTickButton
             app.NextTickButton = uibutton(app.ResultsTab, 'push');
             app.NextTickButton.ButtonPushedFcn = createCallbackFcn(app, @NextTickButtonPushed, true);
-            app.NextTickButton.Position = [469 172 100 22];
+            app.NextTickButton.Position = [479 109 100 22];
             app.NextTickButton.Text = 'Next Tick';
 
             % Create ResultsTextAreaLabel
             app.ResultsTextAreaLabel = uilabel(app.ResultsTab);
             app.ResultsTextAreaLabel.HorizontalAlignment = 'right';
-            app.ResultsTextAreaLabel.Position = [627 172 46 22];
+            app.ResultsTextAreaLabel.Position = [637 109 46 22];
             app.ResultsTextAreaLabel.Text = 'Results';
 
             % Create ResultsTextArea
             app.ResultsTextArea = uitextarea(app.ResultsTab);
-            app.ResultsTextArea.Position = [688 136 150 60];
+            app.ResultsTextArea.Position = [698 73 150 60];
 
             % Create ZoomSlider
             app.ZoomSlider = uislider(app.ResultsTab);
@@ -273,7 +279,21 @@
             app.ZoomSlider.Orientation = 'vertical';
             app.ZoomSlider.ValueChangedFcn = createCallbackFcn(app, @ZoomSliderValueChanged, true);
             app.ZoomSlider.MinorTicks = [];
-            app.ZoomSlider.Position = [1110 363 3 315];
+            app.ZoomSlider.Position = [1134 226 3 315];
+
+            % Create TimingPlotPreview
+            app.TimingPlotPreview = uiaxes(app.ResultsTab);
+            app.TimingPlotPreview.XTick = [];
+            app.TimingPlotPreview.YTick = [];
+            app.TimingPlotPreview.Position = [77 590 1042 81];
+
+            % Create PreviewPlayheadSlider
+            app.PreviewPlayheadSlider = uislider(app.ResultsTab);
+            app.PreviewPlayheadSlider.Limits = [0 1];
+            app.PreviewPlayheadSlider.MajorTicks = [];
+            app.PreviewPlayheadSlider.ValueChangedFcn = createCallbackFcn(app, @PreviewPlayheadSliderValueChanged, true);
+            app.PreviewPlayheadSlider.MinorTicks = [];
+            app.PreviewPlayheadSlider.Position = [81 682 1031 3];
 
             % Create SettingsTab
             app.SettingsTab = uitab(app.TabGroup);
