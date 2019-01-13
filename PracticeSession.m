@@ -77,13 +77,16 @@ classdef PracticeSession < handle
         function runPractice(self, app)
 
             if self.timingInfo.audioLag == 0 && not(self.measuringLag)
-                msgbox('No previously saved information about your system latency was found. Before starting the session, measure the audio lag of your system. You can do that from the "Settings" tab.');
+                msgbox('No previously saved information about your system latency was found. Before starting the session, please measure the audio lag of your system. You can do that from the "Settings" tab.');
                 return;
             end
 
             %% Setup player
             self.prepare(app);
             app.player = audioplayer(self.metronome.audio, str2double(app.SampleRateDropDown.Value), 16, app.OutputDeviceDropDown.Value);
+            set(app.player, 'TimerPeriod', 1);
+            set(app.player, 'TimerFcn', @clockDisplayCallback);
+            set(app.player, 'UserData', app);
 
             %% Setup recorder
             app.deviceReader = audioDeviceReader('SampleRate', str2double(app.SampleRateDropDown.Value), 'SamplesPerFrame', str2double(app.BufferSizeDropDown.Value), 'Device', app.InputDeviceDropDown.Value);
@@ -120,6 +123,7 @@ classdef PracticeSession < handle
 
             while app.player.isplaying() && toc <= self.duration + 1
                 drawnow();
+
                 [audioFrame, numOverrun] = app.deviceReader();
 
                 if numOverrun ~= 0
@@ -140,7 +144,6 @@ classdef PracticeSession < handle
             %     self.addFrame(audioFrame);
             %     % pause(length(audioFrame) / self.fs);
             % end
-
         end
 
         function measureAudioLag(self, app)
@@ -190,7 +193,7 @@ classdef PracticeSession < handle
 
             self.timingInfo.analyseRemaining();
             self.timingInfo.cleanUp();
-            self.lagCompAudioIn = self.audioIn(round(self.timingInfo.fftSize * 0.65625) + self.timingInfo.audioLag + 1:end);
+            self.lagCompAudioIn = self.audioIn(round(self.timingInfo.fftSize * 0.6563) + self.timingInfo.audioLag + 1:end);
         end
 
         function runExtAnalysis(self)
@@ -217,7 +220,7 @@ classdef PracticeSession < handle
 
             startIndex = max(1, int64(self.resultsPlot.playheadLoc));
 
-            if app.StopAfterOneOnsetCheckBox.Value && ~isempty(self.timingInfo.onsets)
+            if app.StopAfterOneOnsetCheckBox.Value && not(isempty(self.timingInfo.onsets))
                 cursor = 1;
 
                 while cursor <= length(self.timingInfo.onsets) && self.timingInfo.onsets(cursor).loc < self.resultsPlot.playheadLoc
@@ -257,7 +260,8 @@ classdef PracticeSession < handle
             sensitivity = app.DetectionSensitivityKnob.Value;
             sessionTempo = app.TempoField.Value;
             sessionDuration = app.DurationField.Value;
-            save('resources/sessionSettings.mat', 'sensitivity', 'sessionTempo', 'sessionDuration');
+            tolerance = app.PermissibleErrorField.Value;
+            save('resources/sessionSettings.mat', 'sensitivity', 'sessionTempo', 'sessionDuration', 'tolerance');
         end
 
     end

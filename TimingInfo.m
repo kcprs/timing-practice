@@ -51,7 +51,7 @@ classdef TimingInfo < handle
             self.onsets = OnsetInfo.empty(0, numOnsets);
             self.onsetInfoCursor = 1;
             self.minOnsetDist = self.detBufSize / 2;
-            self.timingTolerance = session.fs / 100;
+            self.timingTolerance = session.app.PermissibleErrorField.Value * session.fs / 1000;
             self.detectionSensitivity = session.app.DetectionSensitivityKnob.Value;
         end
 
@@ -96,7 +96,7 @@ classdef TimingInfo < handle
             end
 
         end
-        
+
         function runExtAnalysis(self)
             self.earlyNum = 0;
             self.lateNum = 0;
@@ -104,11 +104,11 @@ classdef TimingInfo < handle
             self.avgEarly = 0;
             self.avgLate = 0;
             self.correctNum = 0;
-            
+
             if isempty(self.onsets)
                 return;
             end
-            
+
             early = 0;
             late = 0;
             sumAll = 0;
@@ -135,7 +135,7 @@ classdef TimingInfo < handle
                     self.correctOnsetLocs(correctCursor) = onsetInfo.loc;
                     correctCursor = correctCursor + 1;
                 end
-                
+
             end
 
             self.correctOnsetLocs = self.correctOnsetLocs(1:correctCursor - 1);
@@ -187,9 +187,11 @@ classdef TimingInfo < handle
 
             maxBufVal = max(bufNovelty);
             self.maxNoveltyValue = max(maxBufVal, self.maxNoveltyValue);
+
             if self.maxNoveltyValue ~= 0
                 bufNovelty = bufNovelty / self.maxNoveltyValue;
             end
+
             self.novelty(self.detBufLoc:self.detBufLoc + self.detBufSize - 1) = self.novelty(self.detBufLoc:self.detBufLoc + self.detBufSize - 1) + bufNovelty;
             [~, newOnsetLocs] = findpeaks(bufNovelty, 'MinPeakProminence', 1 - self.detectionSensitivity, 'MinPeakDistance', self.minOnsetDist);
 

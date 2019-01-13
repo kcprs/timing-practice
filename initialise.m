@@ -30,6 +30,7 @@ function initialise(app)
         app.DetectionSensitivityKnob.Value = sessionSettingsStruct.sensitivity;
         app.TempoField.Value = sessionSettingsStruct.sessionTempo;
         app.DurationField.Value = sessionSettingsStruct.sessionDuration;
+        app.PermissibleErrorField.Value = sessionSettingsStruct.tolerance;
     end
 
 end

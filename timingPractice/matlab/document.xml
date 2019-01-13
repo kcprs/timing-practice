@@ -20,8 +20,11 @@
         DurationField                  matlab.ui.control.NumericEditField
         DetectionSensitivityKnobLabel  matlab.ui.control.Label
         DetectionSensitivityKnob       matlab.ui.control.Knob
+        PermissibleErrormsEditFieldLabel  matlab.ui.control.Label
+        PermissibleErrorField          matlab.ui.control.NumericEditField
         TimingGauge                    matlab.ui.control.LinearGauge
         DropoutWarning                 matlab.ui.control.TextArea
+        ClockLabel                     matlab.ui.control.Label
         ResultsTab                     matlab.ui.container.Tab
         TimingPlot                     matlab.ui.control.UIAxes
         PlayheadSlider                 matlab.ui.control.Slider
@@ -173,7 +176,12 @@
 
         % Button pushed function: ResetPlaybackRateButton
         function ResetPlaybackRateButtonPushed(app, event)
-            app.PlaybackRateSlider.Value = 1;
+            app.PlaybackRateSlider.Value = 0;
+        end
+
+        % Value changed function: PermissibleErrorField
+        function PermissibleErrorFieldValueChanged(app, event)
+            app.session.timingInfo.timingTolerance = app.PermissibleErrorField.Value * app.session.fs / 1000;
         end
     end
 
@@ -193,7 +201,7 @@
             % Create TabGroup
             app.TabGroup = uitabgroup(app.UIFigure);
             app.TabGroup.AutoResizeChildren = 'off';
-            app.TabGroup.Position = [1 1 1163 750];
+            app.TabGroup.Position = [1 -9 1163 760];
 
             % Create PracticeTab
             app.PracticeTab = uitab(app.TabGroup);
@@ -203,58 +211,58 @@
             % Create EarlyLampLabel
             app.EarlyLampLabel = uilabel(app.PracticeTab);
             app.EarlyLampLabel.HorizontalAlignment = 'right';
-            app.EarlyLampLabel.Position = [95 486 33 22];
+            app.EarlyLampLabel.Position = [95 496 33 22];
             app.EarlyLampLabel.Text = 'Early';
 
             % Create EarlyLamp
             app.EarlyLamp = uilamp(app.PracticeTab);
-            app.EarlyLamp.Position = [143 405 183 183];
+            app.EarlyLamp.Position = [143 415 183 183];
             app.EarlyLamp.Color = [0.902 0.902 0.902];
 
             % Create OKLampLabel
             app.OKLampLabel = uilabel(app.PracticeTab);
             app.OKLampLabel.HorizontalAlignment = 'right';
-            app.OKLampLabel.Position = [458 485 25 22];
+            app.OKLampLabel.Position = [458 495 25 22];
             app.OKLampLabel.Text = 'OK';
 
             % Create OKLamp
             app.OKLamp = uilamp(app.PracticeTab);
-            app.OKLamp.Position = [498 405 181 181];
+            app.OKLamp.Position = [498 415 181 181];
             app.OKLamp.Color = [0.902 0.902 0.902];
 
             % Create LateLampLabel
             app.LateLampLabel = uilabel(app.PracticeTab);
             app.LateLampLabel.HorizontalAlignment = 'right';
-            app.LateLampLabel.Position = [811 485 29 22];
+            app.LateLampLabel.Position = [811 495 29 22];
             app.LateLampLabel.Text = 'Late';
 
             % Create LateLamp
             app.LateLamp = uilamp(app.PracticeTab);
-            app.LateLamp.Position = [855 405 181 181];
+            app.LateLamp.Position = [855 415 181 181];
             app.LateLamp.Color = [0.902 0.902 0.902];
 
             % Create StartButton
             app.StartButton = uibutton(app.PracticeTab, 'push');
             app.StartButton.ButtonPushedFcn = createCallbackFcn(app, @StartButtonPushed, true);
-            app.StartButton.Position = [646 174 121 55];
+            app.StartButton.Position = [606 184 121 55];
             app.StartButton.Text = 'Start';
 
             % Create StopButton
             app.StopButton = uibutton(app.PracticeTab, 'push');
             app.StopButton.ButtonPushedFcn = createCallbackFcn(app, @StopButtonPushed, true);
-            app.StopButton.Position = [647 101 121 55];
+            app.StopButton.Position = [607 111 121 55];
             app.StopButton.Text = 'Stop';
 
             % Create PracticeOptionsPanel
             app.PracticeOptionsPanel = uipanel(app.PracticeTab);
             app.PracticeOptionsPanel.AutoResizeChildren = 'off';
             app.PracticeOptionsPanel.Title = 'Practice Options';
-            app.PracticeOptionsPanel.Position = [270 101 353 128];
+            app.PracticeOptionsPanel.Position = [211 111 372 128];
 
             % Create TempoBPMEditFieldLabel
             app.TempoBPMEditFieldLabel = uilabel(app.PracticeOptionsPanel);
             app.TempoBPMEditFieldLabel.HorizontalAlignment = 'right';
-            app.TempoBPMEditFieldLabel.Position = [141 65 79 22];
+            app.TempoBPMEditFieldLabel.Position = [141 75 79 22];
             app.TempoBPMEditFieldLabel.Text = 'Tempo (BPM)';
 
             % Create TempoField
@@ -262,13 +270,13 @@
             app.TempoField.Limits = [40 320];
             app.TempoField.RoundFractionalValues = 'on';
             app.TempoField.ValueChangedFcn = createCallbackFcn(app, @SessionSettingsChanged, true);
-            app.TempoField.Position = [238 65 100 22];
+            app.TempoField.Position = [281 75 79 22];
             app.TempoField.Value = 120;
 
             % Create DurationminEditFieldLabel
             app.DurationminEditFieldLabel = uilabel(app.PracticeOptionsPanel);
             app.DurationminEditFieldLabel.HorizontalAlignment = 'right';
-            app.DurationminEditFieldLabel.Position = [141 23 82 22];
+            app.DurationminEditFieldLabel.Position = [141 43 82 22];
             app.DurationminEditFieldLabel.Text = 'Duration (min)';
 
             % Create DurationField
@@ -276,13 +284,13 @@
             app.DurationField.LowerLimitInclusive = 'off';
             app.DurationField.Limits = [0 60];
             app.DurationField.ValueChangedFcn = createCallbackFcn(app, @SessionSettingsChanged, true);
-            app.DurationField.Position = [238 23 100 22];
+            app.DurationField.Position = [281 43 79 22];
             app.DurationField.Value = 1;
 
             % Create DetectionSensitivityKnobLabel
             app.DetectionSensitivityKnobLabel = uilabel(app.PracticeOptionsPanel);
             app.DetectionSensitivityKnobLabel.HorizontalAlignment = 'center';
-            app.DetectionSensitivityKnobLabel.Position = [17 5 114 22];
+            app.DetectionSensitivityKnobLabel.Position = [13 5 114 22];
             app.DetectionSensitivityKnobLabel.Text = 'Detection Sensitivity';
 
             % Create DetectionSensitivityKnob
@@ -290,23 +298,44 @@
             app.DetectionSensitivityKnob.Limits = [0.1 0.9];
             app.DetectionSensitivityKnob.MajorTickLabels = {' '};
             app.DetectionSensitivityKnob.ValueChangedFcn = createCallbackFcn(app, @DetectionSensitivityKnobValueChanged, true);
-            app.DetectionSensitivityKnob.Position = [44 32 60 60];
-            app.DetectionSensitivityKnob.Value = 0.5;
+            app.DetectionSensitivityKnob.Tooltip = {'This parameter determines how sensitive the'; 'onset detection algorithm is. Increase sensitivity'; 'if some onsets do not get detected.'};
+            app.DetectionSensitivityKnob.Position = [40 32 60 60];
+            app.DetectionSensitivityKnob.Value = 0.75;
+
+            % Create PermissibleErrormsEditFieldLabel
+            app.PermissibleErrormsEditFieldLabel = uilabel(app.PracticeOptionsPanel);
+            app.PermissibleErrormsEditFieldLabel.HorizontalAlignment = 'right';
+            app.PermissibleErrormsEditFieldLabel.Position = [141 11 125 22];
+            app.PermissibleErrormsEditFieldLabel.Text = 'Permissible Error (ms)';
+
+            % Create PermissibleErrorField
+            app.PermissibleErrorField = uieditfield(app.PracticeOptionsPanel, 'numeric');
+            app.PermissibleErrorField.Limits = [0 100];
+            app.PermissibleErrorField.ValueChangedFcn = createCallbackFcn(app, @PermissibleErrorFieldValueChanged, true);
+            app.PermissibleErrorField.Position = [281 11 79 22];
+            app.PermissibleErrorField.Value = 10;
 
             % Create TimingGauge
             app.TimingGauge = uigauge(app.PracticeTab, 'linear');
             app.TimingGauge.Limits = [-1 1];
             app.TimingGauge.ScaleColors = [1 0 0;0 1 0;1 0 0;1 0.8667 0;1 0.8706 0];
             app.TimingGauge.ScaleColorLimits = [-1 -0.5;-0.05 0.05;0.5 1;-0.5 -0.05;0.05 0.5];
-            app.TimingGauge.Position = [72 317 1021.984375 40];
+            app.TimingGauge.Position = [72 327 1021.984375 40];
 
             % Create DropoutWarning
             app.DropoutWarning = uitextarea(app.PracticeTab);
             app.DropoutWarning.Editable = 'off';
             app.DropoutWarning.BackgroundColor = [1 0.6392 0.6392];
             app.DropoutWarning.Visible = 'off';
-            app.DropoutWarning.Position = [793 101 235 128];
+            app.DropoutWarning.Position = [753 111 235 55];
             app.DropoutWarning.Value = {'Audio dropouts detected. Please increase the buffer size in the "Settings" tab.'};
+
+            % Create ClockLabel
+            app.ClockLabel = uilabel(app.PracticeTab);
+            app.ClockLabel.HorizontalAlignment = 'center';
+            app.ClockLabel.FontSize = 70;
+            app.ClockLabel.Position = [753 168 235 86];
+            app.ClockLabel.Text = '00:00';
 
             % Create ResultsTab
             app.ResultsTab = uitab(app.TabGroup);
@@ -322,7 +351,7 @@
             app.TimingPlot.XTickLabel = {};
             app.TimingPlot.YTick = [];
             app.TimingPlot.YTickLabel = {};
-            app.TimingPlot.Position = [59 253 1046 376];
+            app.TimingPlot.Position = [59 263 1046 376];
 
             % Create PlayheadSlider
             app.PlayheadSlider = uislider(app.ResultsTab);
@@ -330,7 +359,7 @@
             app.PlayheadSlider.MajorTicks = [];
             app.PlayheadSlider.ValueChangedFcn = createCallbackFcn(app, @PlayheadSliderValueChanged, true);
             app.PlayheadSlider.MinorTicks = [];
-            app.PlayheadSlider.Position = [63 267 1038 3];
+            app.PlayheadSlider.Position = [63 277 1038 3];
 
             % Create ZoomSlider
             app.ZoomSlider = uislider(app.ResultsTab);
@@ -339,7 +368,7 @@
             app.ZoomSlider.Orientation = 'vertical';
             app.ZoomSlider.ValueChangedFcn = createCallbackFcn(app, @ZoomSliderValueChanged, true);
             app.ZoomSlider.MinorTicks = [];
-            app.ZoomSlider.Position = [1115 281 3 320];
+            app.ZoomSlider.Position = [1115 291 3 320];
 
             % Create TimingPlotPreview
             app.TimingPlotPreview = uiaxes(app.ResultsTab);
@@ -349,7 +378,7 @@
             app.TimingPlotPreview.XTickLabel = {};
             app.TimingPlotPreview.YTick = [];
             app.TimingPlotPreview.YTickLabel = {};
-            app.TimingPlotPreview.Position = [59 616 1046 81];
+            app.TimingPlotPreview.Position = [59 626 1046 81];
 
             % Create PreviewPlayheadSlider
             app.PreviewPlayheadSlider = uislider(app.ResultsTab);
@@ -357,13 +386,13 @@
             app.PreviewPlayheadSlider.MajorTicks = [];
             app.PreviewPlayheadSlider.ValueChangedFcn = createCallbackFcn(app, @PreviewPlayheadSliderValueChanged, true);
             app.PreviewPlayheadSlider.MinorTicks = [];
-            app.PreviewPlayheadSlider.Position = [63 699 1038 3];
+            app.PreviewPlayheadSlider.Position = [63 709 1038 3];
 
             % Create SelectedOnsetResultsPanel
             app.SelectedOnsetResultsPanel = uipanel(app.ResultsTab);
             app.SelectedOnsetResultsPanel.AutoResizeChildren = 'off';
             app.SelectedOnsetResultsPanel.Title = 'Selected Onset Results';
-            app.SelectedOnsetResultsPanel.Position = [386 13 232 233];
+            app.SelectedOnsetResultsPanel.Position = [364 23 253 233];
 
             % Create TimingLabel
             app.TimingLabel = uilabel(app.SelectedOnsetResultsPanel);
@@ -383,32 +412,32 @@
             % Create NextOnsetButton
             app.NextOnsetButton = uibutton(app.SelectedOnsetResultsPanel, 'push');
             app.NextOnsetButton.ButtonPushedFcn = createCallbackFcn(app, @NextOnsetButtonPushed, true);
-            app.NextOnsetButton.Position = [121 60 100 32];
+            app.NextOnsetButton.Position = [132 60 108 32];
             app.NextOnsetButton.Text = 'Next Onset';
 
             % Create PreviousOnsetButton
             app.PreviousOnsetButton = uibutton(app.SelectedOnsetResultsPanel, 'push');
             app.PreviousOnsetButton.ButtonPushedFcn = createCallbackFcn(app, @PreviousOnsetButtonPushed, true);
-            app.PreviousOnsetButton.Position = [9 60 100 32];
+            app.PreviousOnsetButton.Position = [9 60 108 32];
             app.PreviousOnsetButton.Text = 'Previous Onset';
 
             % Create PreviousTickButton
             app.PreviousTickButton = uibutton(app.SelectedOnsetResultsPanel, 'push');
             app.PreviousTickButton.ButtonPushedFcn = createCallbackFcn(app, @PreviousTickButtonPushed, true);
-            app.PreviousTickButton.Position = [9 14 100 32];
+            app.PreviousTickButton.Position = [9 14 108 32];
             app.PreviousTickButton.Text = 'Previous Tick';
 
             % Create NextTickButton
             app.NextTickButton = uibutton(app.SelectedOnsetResultsPanel, 'push');
             app.NextTickButton.ButtonPushedFcn = createCallbackFcn(app, @NextTickButtonPushed, true);
-            app.NextTickButton.Position = [121 14 100 32];
+            app.NextTickButton.Position = [132 14 108 32];
             app.NextTickButton.Text = 'Next Tick';
 
             % Create GlobalResultsPanel
             app.GlobalResultsPanel = uipanel(app.ResultsTab);
             app.GlobalResultsPanel.AutoResizeChildren = 'off';
             app.GlobalResultsPanel.Title = 'Global Results';
-            app.GlobalResultsPanel.Position = [59 13 310 233];
+            app.GlobalResultsPanel.Position = [59 23 287 233];
 
             % Create AverageErrorLabel
             app.AverageErrorLabel = uilabel(app.GlobalResultsPanel);
@@ -444,7 +473,7 @@
             app.PlaybackPanel = uipanel(app.ResultsTab);
             app.PlaybackPanel.AutoResizeChildren = 'off';
             app.PlaybackPanel.Title = 'Playback';
-            app.PlaybackPanel.Position = [634 13 463 234];
+            app.PlaybackPanel.Position = [634 23 463 234];
 
             % Create ResultsStopButton
             app.ResultsStopButton = uibutton(app.PlaybackPanel, 'push');
@@ -463,7 +492,7 @@
             app.MetronomeVolumeSlider.MajorTicks = [];
             app.MetronomeVolumeSlider.MinorTicks = [];
             app.MetronomeVolumeSlider.Position = [146 23 299 3];
-            app.MetronomeVolumeSlider.Value = 1;
+            app.MetronomeVolumeSlider.Value = 0.5;
 
             % Create RecordingVolumeSliderLabel
             app.RecordingVolumeSliderLabel = uilabel(app.PlaybackPanel);
@@ -517,7 +546,7 @@
             app.SystemSettingsPanel = uipanel(app.SettingsTab);
             app.SystemSettingsPanel.AutoResizeChildren = 'off';
             app.SystemSettingsPanel.Title = 'System Settings';
-            app.SystemSettingsPanel.Position = [389 424 716 257];
+            app.SystemSettingsPanel.Position = [389 434 716 257];
 
             % Create SampleRateDropDownLabel
             app.SampleRateDropDownLabel = uilabel(app.SystemSettingsPanel);
@@ -570,7 +599,7 @@
             app.AudioLagCompensationPanel = uipanel(app.SettingsTab);
             app.AudioLagCompensationPanel.AutoResizeChildren = 'off';
             app.AudioLagCompensationPanel.Title = 'Audio Lag Compensation';
-            app.AudioLagCompensationPanel.Position = [43 424 334 257];
+            app.AudioLagCompensationPanel.Position = [43 434 334 257];
 
             % Create MeasureAudioLagButton
             app.MeasureAudioLagButton = uibutton(app.AudioLagCompensationPanel, 'push');

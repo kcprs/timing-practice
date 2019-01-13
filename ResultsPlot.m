@@ -169,7 +169,7 @@ classdef ResultsPlot < handle
             self.session.app.ZoomSlider.Value = zoomFactor;
 
             initSpan = self.initXLim(2) - self.initXLim(1);
-            maxZoomSpan = 128; %self.session.fs;
+            maxZoomSpan = self.session.fs / 4;
             currentSpan = initSpan - zoomFactor * (initSpan - maxZoomSpan);
 
             leftBoundRequested = self.playheadLoc - currentSpan / 2;
