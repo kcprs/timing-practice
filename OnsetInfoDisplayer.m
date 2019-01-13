@@ -51,7 +51,7 @@ classdef OnsetInfoDisplayer < handle
         end
 
         function displayOnsetInfo(self)
-            self.app.TimeLabel.Text = sprintf('Time: %0.2f s', double(self.selectedOnset.loc) / double(self.session.fs));
+            self.app.TimestampLabel.Text = sprintf('Timestamp: %0.2f s', double(self.selectedOnset.loc) / double(self.session.fs));
             self.app.TimingLabel.Text = ['Timing: ', self.selectedOnset.timing];
             self.app.ErrorLabel.Text = sprintf('Error: %0.2f ms', double(self.selectedOnset.value) / double(self.session.fs) * 1000);
         end

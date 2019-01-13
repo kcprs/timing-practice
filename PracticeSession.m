@@ -205,6 +205,7 @@ classdef PracticeSession < handle
 
             app.RecordingVolumeSlider.Enable = false;
             app.MetronomeVolumeSlider.Enable = false;
+            app.PlaybackRateSlider.Enable = false;
 
             if length(self.metronome.audio) > length(self.lagCompAudioIn)
                 alignedMetro = self.metronome.audio(1:length(self.lagCompAudioIn));
@@ -231,8 +232,9 @@ classdef PracticeSession < handle
             end
 
             if ~isempty(toPlay)
-                app.player = audioplayer(toPlay, str2double(app.SampleRateDropDown.Value), 16, app.OutputDeviceDropDown.Value);
-                set(app.player, 'StopFcn', @reactivateVolumeSlidersCallback);
+                rate = 2^(app.PlaybackRateSlider.Value);
+                app.player = audioplayer(toPlay, str2double(app.SampleRateDropDown.Value) * rate, 16, app.OutputDeviceDropDown.Value);
+                set(app.player, 'StopFcn', @reactivatePlaybackSlidersCallback);
                 set(app.player, 'UserData', app);
                 set(app.player, 'TimerPeriod', 1/8);
                 set(app.player, 'TimerFcn', @movePlayheadCallback)

@@ -31,7 +31,7 @@
         SelectedOnsetResultsPanel      matlab.ui.container.Panel
         TimingLabel                    matlab.ui.control.Label
         ErrorLabel                     matlab.ui.control.Label
-        TimeLabel                      matlab.ui.control.Label
+        TimestampLabel                 matlab.ui.control.Label
         NextOnsetButton                matlab.ui.control.Button
         PreviousOnsetButton            matlab.ui.control.Button
         PreviousTickButton             matlab.ui.control.Button
@@ -44,13 +44,16 @@
         NumberOfLateOnsetsLabel        matlab.ui.control.Label
         NumberOfCorrectOnsetsLabel     matlab.ui.control.Label
         PlaybackPanel                  matlab.ui.container.Panel
-        PlayFromCursorButton           matlab.ui.control.Button
         ResultsStopButton              matlab.ui.control.Button
         MetronomeVolumeSliderLabel     matlab.ui.control.Label
         MetronomeVolumeSlider          matlab.ui.control.Slider
         RecordingVolumeSliderLabel     matlab.ui.control.Label
         RecordingVolumeSlider          matlab.ui.control.Slider
+        PlayFromCursorButton           matlab.ui.control.Button
         StopAfterOneOnsetCheckBox      matlab.ui.control.CheckBox
+        ResetPlaybackRateButton        matlab.ui.control.Button
+        PlaybackRateSliderLabel        matlab.ui.control.Label
+        PlaybackRateSlider             matlab.ui.control.Slider
         SettingsTab                    matlab.ui.container.Tab
         SystemSettingsPanel            matlab.ui.container.Panel
         SampleRateDropDownLabel        matlab.ui.control.Label
@@ -166,6 +169,11 @@
         % Value changed function: DurationField, TempoField
         function SessionSettingsChanged(app, event)
             app.session.saveSessionSettings(app);
+        end
+
+        % Button pushed function: ResetPlaybackRateButton
+        function ResetPlaybackRateButtonPushed(app, event)
+            app.PlaybackRateSlider.Value = 1;
         end
     end
 
@@ -355,104 +363,98 @@
             app.SelectedOnsetResultsPanel = uipanel(app.ResultsTab);
             app.SelectedOnsetResultsPanel.AutoResizeChildren = 'off';
             app.SelectedOnsetResultsPanel.Title = 'Selected Onset Results';
-            app.SelectedOnsetResultsPanel.Position = [63 25 232 221];
+            app.SelectedOnsetResultsPanel.Position = [386 13 232 233];
 
             % Create TimingLabel
             app.TimingLabel = uilabel(app.SelectedOnsetResultsPanel);
-            app.TimingLabel.Position = [15 133 203 22];
+            app.TimingLabel.Position = [15 142 203 22];
             app.TimingLabel.Text = 'Timing:';
 
             % Create ErrorLabel
             app.ErrorLabel = uilabel(app.SelectedOnsetResultsPanel);
-            app.ErrorLabel.Position = [15 100 203 22];
+            app.ErrorLabel.Position = [15 106 203 22];
             app.ErrorLabel.Text = 'Error:';
 
-            % Create TimeLabel
-            app.TimeLabel = uilabel(app.SelectedOnsetResultsPanel);
-            app.TimeLabel.Position = [15 166 203 22];
-            app.TimeLabel.Text = 'Time:';
+            % Create TimestampLabel
+            app.TimestampLabel = uilabel(app.SelectedOnsetResultsPanel);
+            app.TimestampLabel.Position = [15 178 203 22];
+            app.TimestampLabel.Text = 'Timestamp:';
 
             % Create NextOnsetButton
             app.NextOnsetButton = uibutton(app.SelectedOnsetResultsPanel, 'push');
             app.NextOnsetButton.ButtonPushedFcn = createCallbackFcn(app, @NextOnsetButtonPushed, true);
-            app.NextOnsetButton.Position = [121 54 100 32];
+            app.NextOnsetButton.Position = [121 60 100 32];
             app.NextOnsetButton.Text = 'Next Onset';
 
             % Create PreviousOnsetButton
             app.PreviousOnsetButton = uibutton(app.SelectedOnsetResultsPanel, 'push');
             app.PreviousOnsetButton.ButtonPushedFcn = createCallbackFcn(app, @PreviousOnsetButtonPushed, true);
-            app.PreviousOnsetButton.Position = [9 54 100 32];
+            app.PreviousOnsetButton.Position = [9 60 100 32];
             app.PreviousOnsetButton.Text = 'Previous Onset';
 
             % Create PreviousTickButton
             app.PreviousTickButton = uibutton(app.SelectedOnsetResultsPanel, 'push');
             app.PreviousTickButton.ButtonPushedFcn = createCallbackFcn(app, @PreviousTickButtonPushed, true);
-            app.PreviousTickButton.Position = [9 13 100 32];
+            app.PreviousTickButton.Position = [9 14 100 32];
             app.PreviousTickButton.Text = 'Previous Tick';
 
             % Create NextTickButton
             app.NextTickButton = uibutton(app.SelectedOnsetResultsPanel, 'push');
             app.NextTickButton.ButtonPushedFcn = createCallbackFcn(app, @NextTickButtonPushed, true);
-            app.NextTickButton.Position = [121 13 100 32];
+            app.NextTickButton.Position = [121 14 100 32];
             app.NextTickButton.Text = 'Next Tick';
 
             % Create GlobalResultsPanel
             app.GlobalResultsPanel = uipanel(app.ResultsTab);
             app.GlobalResultsPanel.AutoResizeChildren = 'off';
             app.GlobalResultsPanel.Title = 'Global Results';
-            app.GlobalResultsPanel.Position = [326 107 439 139];
+            app.GlobalResultsPanel.Position = [59 13 310 233];
 
             % Create AverageErrorLabel
             app.AverageErrorLabel = uilabel(app.GlobalResultsPanel);
-            app.AverageErrorLabel.Position = [16 84 184 22];
+            app.AverageErrorLabel.Position = [13 76 284 22];
             app.AverageErrorLabel.Text = 'Average Error:';
 
             % Create AverageLateErrorLabel
             app.AverageLateErrorLabel = uilabel(app.GlobalResultsPanel);
-            app.AverageLateErrorLabel.Position = [16 18 184 22];
+            app.AverageLateErrorLabel.Position = [13 9 284 22];
             app.AverageLateErrorLabel.Text = 'Average Late Error:';
 
             % Create AverageEarlyErrorLabel
             app.AverageEarlyErrorLabel = uilabel(app.GlobalResultsPanel);
-            app.AverageEarlyErrorLabel.Position = [16 51 184 22];
+            app.AverageEarlyErrorLabel.Position = [13 42 284 22];
             app.AverageEarlyErrorLabel.Text = 'Average Early Error:';
 
             % Create NumberOfEarlyOnsetsLabel
             app.NumberOfEarlyOnsetsLabel = uilabel(app.GlobalResultsPanel);
-            app.NumberOfEarlyOnsetsLabel.Position = [213 51 202 22];
+            app.NumberOfEarlyOnsetsLabel.Position = [13 144 284 22];
             app.NumberOfEarlyOnsetsLabel.Text = 'Number Of Early Onsets:';
 
             % Create NumberOfLateOnsetsLabel
             app.NumberOfLateOnsetsLabel = uilabel(app.GlobalResultsPanel);
-            app.NumberOfLateOnsetsLabel.Position = [213 18 202 22];
+            app.NumberOfLateOnsetsLabel.Position = [13 110 284 22];
             app.NumberOfLateOnsetsLabel.Text = 'Number Of Late Onsets:';
 
             % Create NumberOfCorrectOnsetsLabel
             app.NumberOfCorrectOnsetsLabel = uilabel(app.GlobalResultsPanel);
-            app.NumberOfCorrectOnsetsLabel.Position = [213 84 202 22];
+            app.NumberOfCorrectOnsetsLabel.Position = [13 178 284 22];
             app.NumberOfCorrectOnsetsLabel.Text = 'Number Of Correct Onsets:';
 
             % Create PlaybackPanel
             app.PlaybackPanel = uipanel(app.ResultsTab);
             app.PlaybackPanel.AutoResizeChildren = 'off';
             app.PlaybackPanel.Title = 'Playback';
-            app.PlaybackPanel.Position = [784 25 313 222];
-
-            % Create PlayFromCursorButton
-            app.PlayFromCursorButton = uibutton(app.PlaybackPanel, 'push');
-            app.PlayFromCursorButton.ButtonPushedFcn = createCallbackFcn(app, @PlayFromCursorButtonPushed, true);
-            app.PlayFromCursorButton.Position = [20 133 132 55];
-            app.PlayFromCursorButton.Text = 'Play From Cursor';
+            app.PlaybackPanel.Position = [634 13 463 234];
 
             % Create ResultsStopButton
             app.ResultsStopButton = uibutton(app.PlaybackPanel, 'push');
             app.ResultsStopButton.ButtonPushedFcn = createCallbackFcn(app, @ResultsStopButtonPushed, true);
-            app.ResultsStopButton.Position = [165 133 132 55];
+            app.ResultsStopButton.Position = [160 158 132 45];
             app.ResultsStopButton.Text = 'Stop';
 
             % Create MetronomeVolumeSliderLabel
             app.MetronomeVolumeSliderLabel = uilabel(app.PlaybackPanel);
-            app.MetronomeVolumeSliderLabel.Position = [20 15 110 22];
+            app.MetronomeVolumeSliderLabel.Position = [15 14 110 22];
             app.MetronomeVolumeSliderLabel.Text = 'Metronome Volume';
 
             % Create MetronomeVolumeSlider
@@ -460,12 +462,12 @@
             app.MetronomeVolumeSlider.Limits = [0 1];
             app.MetronomeVolumeSlider.MajorTicks = [];
             app.MetronomeVolumeSlider.MinorTicks = [];
-            app.MetronomeVolumeSlider.Position = [151 24 141 3];
+            app.MetronomeVolumeSlider.Position = [146 23 299 3];
             app.MetronomeVolumeSlider.Value = 1;
 
             % Create RecordingVolumeSliderLabel
             app.RecordingVolumeSliderLabel = uilabel(app.PlaybackPanel);
-            app.RecordingVolumeSliderLabel.Position = [21 54 111 22];
+            app.RecordingVolumeSliderLabel.Position = [16 56 111 22];
             app.RecordingVolumeSliderLabel.Text = 'Recording Volume';
 
             % Create RecordingVolumeSlider
@@ -473,13 +475,38 @@
             app.RecordingVolumeSlider.Limits = [0 1];
             app.RecordingVolumeSlider.MajorTicks = [];
             app.RecordingVolumeSlider.MinorTicks = [];
-            app.RecordingVolumeSlider.Position = [151 63 142 3];
+            app.RecordingVolumeSlider.Position = [146 65 299 3];
             app.RecordingVolumeSlider.Value = 1;
+
+            % Create PlayFromCursorButton
+            app.PlayFromCursorButton = uibutton(app.PlaybackPanel, 'push');
+            app.PlayFromCursorButton.ButtonPushedFcn = createCallbackFcn(app, @PlayFromCursorButtonPushed, true);
+            app.PlayFromCursorButton.Position = [15 158 132 45];
+            app.PlayFromCursorButton.Text = 'Play From Cursor';
 
             % Create StopAfterOneOnsetCheckBox
             app.StopAfterOneOnsetCheckBox = uicheckbox(app.PlaybackPanel);
-            app.StopAfterOneOnsetCheckBox.Text = 'Stop After One Onset';
-            app.StopAfterOneOnsetCheckBox.Position = [20 91 146 22];
+            app.StopAfterOneOnsetCheckBox.Text = '  Stop After One Onset';
+            app.StopAfterOneOnsetCheckBox.Position = [307 169 143 22];
+
+            % Create ResetPlaybackRateButton
+            app.ResetPlaybackRateButton = uibutton(app.PlaybackPanel, 'push');
+            app.ResetPlaybackRateButton.ButtonPushedFcn = createCallbackFcn(app, @ResetPlaybackRateButtonPushed, true);
+            app.ResetPlaybackRateButton.Position = [318 98 132 45];
+            app.ResetPlaybackRateButton.Text = 'Reset Playback Rate';
+
+            % Create PlaybackRateSliderLabel
+            app.PlaybackRateSliderLabel = uilabel(app.PlaybackPanel);
+            app.PlaybackRateSliderLabel.Position = [16 110 83 22];
+            app.PlaybackRateSliderLabel.Text = 'Playback Rate';
+
+            % Create PlaybackRateSlider
+            app.PlaybackRateSlider = uislider(app.PlaybackPanel);
+            app.PlaybackRateSlider.Limits = [-2 2];
+            app.PlaybackRateSlider.MajorTicks = [-2 0 2];
+            app.PlaybackRateSlider.MajorTickLabels = {'0.25', '1', '4'};
+            app.PlaybackRateSlider.MinorTicks = [];
+            app.PlaybackRateSlider.Position = [111 128 191 3];
 
             % Create SettingsTab
             app.SettingsTab = uitab(app.TabGroup);
