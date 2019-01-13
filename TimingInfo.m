@@ -32,7 +32,7 @@ classdef TimingInfo < handle
     methods
 
         function self = TimingInfo()
-            self.fftSize = 2048; 
+            self.fftSize = 2048;
             self.hopSize = 128; % Keep this low to maintain high accuracy
             self.audioLag = 0;
         end
@@ -90,19 +90,32 @@ classdef TimingInfo < handle
             end
 
             self.onsetLocs = self.onsetLocs(startCursor:cursor - 1);
-            self.onsets = self.onsets(startCursor:cursor - 1);
-        end
 
+            if ~isempty(self.onsets)
+                self.onsets = self.onsets(startCursor:cursor - 1);
+            end
+
+        end
+        
         function runExtAnalysis(self)
-            early = 0;
             self.earlyNum = 0;
-            late = 0;
             self.lateNum = 0;
+            self.average = 0;
+            self.avgEarly = 0;
+            self.avgLate = 0;
+            self.correctNum = 0;
+            
+            if isempty(self.onsets)
+                return;
+            end
+            
+            early = 0;
+            late = 0;
             sumAll = 0;
-            self.correctOnsetLocs = zeros(0, length(self.onsets));
             correctCursor = 1;
-            self.incorrectOnsetLocs = zeros(0, length(self.onsets));
             incorrectCursor = 1;
+            self.correctOnsetLocs = zeros(0, length(self.onsets));
+            self.incorrectOnsetLocs = zeros(0, length(self.onsets));
 
             for iter = 1:length(self.onsetLocs)
                 onsetInfo = self.onsets(iter);
@@ -122,7 +135,7 @@ classdef TimingInfo < handle
                     self.correctOnsetLocs(correctCursor) = onsetInfo.loc;
                     correctCursor = correctCursor + 1;
                 end
-
+                
             end
 
             self.correctOnsetLocs = self.correctOnsetLocs(1:correctCursor - 1);
@@ -132,20 +145,14 @@ classdef TimingInfo < handle
 
             if self.allNum ~= 0
                 self.average = sumAll / self.allNum;
-            else
-                self.average = 0;
             end
 
             if self.earlyNum ~= 0
                 self.avgEarly = early / self.earlyNum;
-            else
-                self.avgEarly = 0;
             end
 
             if self.avgLate ~= 0
                 self.avgLate = late / self.lateNum;
-            else
-                self.avgLate = 0;
             end
 
         end
@@ -158,10 +165,7 @@ classdef TimingInfo < handle
             frameFFT = fft(currentFrame .* hann(self.fftSize));
             previousFrameFFT = fft(previousFrame .* hann(self.fftSize));
             fftDifference = abs(frameFFT(1:self.fftSize / 2 - 1)) - abs(previousFrameFFT(1:self.fftSize / 2 - 1));
-            fftDifferenceNorm = fftDifference .* linspace(1, self.fftSize / 2 - 1, self.fftSize / 2 - 1)';
-            specFlux = sum(fftDifferenceNorm);
-            framePower = sum(currentFrame.^2);
-            novelty = specFlux * framePower;
+            novelty = sum(fftDifference);
         end
 
         function newOnsetLocs = detectOnsets(self)
@@ -183,9 +187,11 @@ classdef TimingInfo < handle
 
             maxBufVal = max(bufNovelty);
             self.maxNoveltyValue = max(maxBufVal, self.maxNoveltyValue);
-            bufNovelty = bufNovelty / self.maxNoveltyValue;
-            self.novelty(self.detBufLoc:self.detBufLoc + self.detBufSize - 1) = bufNovelty;
-            [~, newOnsetLocs] = findpeaks(bufNovelty, 'MinPeakProminence', 1 - self.detectionSensitivity);%, 'MinPeakDistance', self.minOnsetDist);
+            if self.maxNoveltyValue ~= 0
+                bufNovelty = bufNovelty / self.maxNoveltyValue;
+            end
+            self.novelty(self.detBufLoc:self.detBufLoc + self.detBufSize - 1) = self.novelty(self.detBufLoc:self.detBufLoc + self.detBufSize - 1) + bufNovelty;
+            [~, newOnsetLocs] = findpeaks(bufNovelty, 'MinPeakProminence', 1 - self.detectionSensitivity, 'MinPeakDistance', self.minOnsetDist);
 
             numOnsets = length(newOnsetLocs);
 

@@ -349,7 +349,7 @@
             app.PreviewPlayheadSlider.MajorTicks = [];
             app.PreviewPlayheadSlider.ValueChangedFcn = createCallbackFcn(app, @PreviewPlayheadSliderValueChanged, true);
             app.PreviewPlayheadSlider.MinorTicks = [];
-            app.PreviewPlayheadSlider.Position = [63 699 1034 3];
+            app.PreviewPlayheadSlider.Position = [63 699 1038 3];
 
             % Create SelectedOnsetResultsPanel
             app.SelectedOnsetResultsPanel = uipanel(app.ResultsTab);
@@ -480,7 +480,6 @@
             app.StopAfterOneOnsetCheckBox = uicheckbox(app.PlaybackPanel);
             app.StopAfterOneOnsetCheckBox.Text = 'Stop After One Onset';
             app.StopAfterOneOnsetCheckBox.Position = [20 91 146 22];
-            app.StopAfterOneOnsetCheckBox.Value = true;
 
             % Create SettingsTab
             app.SettingsTab = uitab(app.TabGroup);

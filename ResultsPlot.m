@@ -36,7 +36,7 @@ classdef ResultsPlot < handle
 
         function plotSession(self, session)
             self.onsetInfoDisplayer = OnsetInfoDisplayer(session.app, self.playheadLoc);
-            lagCompNovelty = session.timingInfo.novelty(session.timingInfo.audioLag + 1:end);
+            % lagCompNovelty = session.timingInfo.novelty(session.timingInfo.audioLag + 1:end);
             % time = linspace(0, length(lagCompAudioIn) / session.fs, length(lagCompAudioIn));
             leftBound = 0;
             rightBound = length(session.lagCompAudioIn);
@@ -50,7 +50,7 @@ classdef ResultsPlot < handle
             % Plot the detailed plot in the main figure
             plot(self.mainPlot, session.lagCompAudioIn);
             hold(self.mainPlot, 'on');
-            plot(self.mainPlot, lagCompNovelty);
+            % plot(self.mainPlot, lagCompNovelty);
             plot(self.mainPlot, session.timingInfo.correctOnsetLocs, zeros(length(session.timingInfo.correctOnsetLocs), 1), 'x', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'g');
             plot(self.mainPlot, session.timingInfo.incorrectOnsetLocs, zeros(length(session.timingInfo.incorrectOnsetLocs), 1), 'x', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'r');
             hold(self.mainPlot, 'off');
@@ -60,7 +60,6 @@ classdef ResultsPlot < handle
             self.initYLim = self.mainPlot.YLim;
 
             set(self.mainPlot, 'XGrid', 'on', 'XTick', self.session.timingInfo.tickLocs);
-
 
             self.movePlayhead(1);
             self.zoom(0);
@@ -73,6 +72,11 @@ classdef ResultsPlot < handle
             end
 
             if strcmp(locType, 'onset')
+
+                if isempty(self.session.timingInfo.onsets)
+                    return;
+                end
+
                 locs = self.session.timingInfo.onsetLocs;
             elseif strcmp(locType, 'tick')
                 locs = self.session.timingInfo.tickLocs;
@@ -165,7 +169,7 @@ classdef ResultsPlot < handle
             self.session.app.ZoomSlider.Value = zoomFactor;
 
             initSpan = self.initXLim(2) - self.initXLim(1);
-            maxZoomSpan = 128;%self.session.fs;
+            maxZoomSpan = 128; %self.session.fs;
             currentSpan = initSpan - zoomFactor * (initSpan - maxZoomSpan);
 
             leftBoundRequested = self.playheadLoc - currentSpan / 2;
@@ -187,10 +191,11 @@ classdef ResultsPlot < handle
             if self.zoomFactor ~= 0
                 left = self.mainPlot.XLim(1);
                 bottom = self.previewPlot.YLim(1);
-                rectWidth = self.mainPlot.XLim(2) -self.mainPlot.XLim(1);
+                rectWidth = self.mainPlot.XLim(2) - self.mainPlot.XLim(1);
                 height = self.previewPlot.YLim(2) - self.previewPlot.YLim(1);
                 self.zoomRectangle = rectangle(self.previewPlot, 'Position', [left, bottom, rectWidth, height], 'EdgeColor', 'none', 'FaceColor', Colours.transparentBlue);
             end
+
         end
 
         function playheadSliderMoved(self, sliderValue)

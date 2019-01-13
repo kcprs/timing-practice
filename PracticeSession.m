@@ -116,30 +116,30 @@ classdef PracticeSession < handle
         end
 
         function recordPractice(self, app)
-            % tic;
+            tic;
 
-            % while app.player.isplaying() && toc <= self.duration + 1
-            %     drawnow();
-            %     [audioFrame, numOverrun] = app.deviceReader();
+            while app.player.isplaying() && toc <= self.duration + 1
+                drawnow();
+                [audioFrame, numOverrun] = app.deviceReader();
 
-            %     if numOverrun ~= 0
-            %         app.DropoutWarning.Visible = true;
-            %     end
+                if numOverrun ~= 0
+                    app.DropoutWarning.Visible = true;
+                end
 
-            %     self.addFrame([zeros(numOverrun, 1); audioFrame]);
-            % end
+                self.addFrame([zeros(numOverrun, 1); audioFrame]);
+            end
 
             % Debug
-            cursor = 1;
-            frameSize = 512;
-            testAudio = audioread('resources/testPiano.wav');
+            % cursor = 1;
+            % frameSize = 512;
+            % testAudio = audioread('resources/testPiano.wav');
 
-            while cursor + frameSize < length(testAudio)
-                audioFrame = testAudio(cursor:cursor + frameSize - 1);
-                cursor = cursor + frameSize;
-                self.addFrame(audioFrame);
-                % pause(length(audioFrame) / self.fs);
-            end
+            % while cursor + frameSize < length(testAudio)
+            %     audioFrame = testAudio(cursor:cursor + frameSize - 1);
+            %     cursor = cursor + frameSize;
+            %     self.addFrame(audioFrame);
+            %     % pause(length(audioFrame) / self.fs);
+            % end
 
         end
 
@@ -183,10 +183,14 @@ classdef PracticeSession < handle
         end
 
         function cleanUp(self)
-            self.audioIn = self.audioIn(1:self.audioCursor);
+
+            if self.audioCursor < length(self.audioIn)
+                self.audioIn = self.audioIn(1:self.audioCursor);
+            end
+
             self.timingInfo.analyseRemaining();
             self.timingInfo.cleanUp();
-            self.lagCompAudioIn = self.audioIn(self.timingInfo.audioLag + 1:end);
+            self.lagCompAudioIn = self.audioIn(round(self.timingInfo.fftSize * 0.65625) + self.timingInfo.audioLag + 1:end);
         end
 
         function runExtAnalysis(self)
@@ -212,7 +216,7 @@ classdef PracticeSession < handle
 
             startIndex = max(1, int64(self.resultsPlot.playheadLoc));
 
-            if app.StopAfterOneOnsetCheckBox.Value
+            if app.StopAfterOneOnsetCheckBox.Value && ~isempty(self.timingInfo.onsets)
                 cursor = 1;
 
                 while cursor <= length(self.timingInfo.onsets) && self.timingInfo.onsets(cursor).loc < self.resultsPlot.playheadLoc

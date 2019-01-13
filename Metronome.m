@@ -25,7 +25,7 @@ classdef Metronome < handle
                 multiWaitbar('Generating metronome signal...', progress);
             end
 
-            self.ticks = circshift(self.ticks, floor(interval / 2));
+            self.ticks = circshift(self.ticks, floor(interval / 2) - session.timingInfo.audioLag);
             tick = [zeros(length(tick), 1); tick];
             self.audio = conv(self.ticks, tick, 'same');
 

@@ -23,6 +23,11 @@ classdef OnsetInfoDisplayer < handle
         end
 
         function selectAt(self, playheadLoc)
+
+            if isempty(self.onsets())
+                return;
+            end
+
             self.playheadLoc = playheadLoc;
 
             cursor = 1;
