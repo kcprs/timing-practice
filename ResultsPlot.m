@@ -36,7 +36,7 @@ classdef ResultsPlot < handle
 
         function plotSession(self, session)
             self.onsetInfoDisplayer = OnsetInfoDisplayer(session.app, self.playheadLoc);
-            % lagCompNovelty = session.timingInfo.novelty(session.timingInfo.audioLag + 1:end);
+            lagCompNovelty = session.timingInfo.novelty(session.timingInfo.audioLag + 1:end);
             % time = linspace(0, length(lagCompAudioIn) / session.fs, length(lagCompAudioIn));
             leftBound = 0;
             rightBound = length(session.lagCompAudioIn);
@@ -50,6 +50,7 @@ classdef ResultsPlot < handle
             % Plot the detailed plot in the main figure
             plot(self.mainPlot, session.lagCompAudioIn);
             hold(self.mainPlot, 'on');
+            plot(self.mainPlot, lagCompNovelty);
             plot(self.mainPlot, session.timingInfo.correctOnsetLocs, zeros(length(session.timingInfo.correctOnsetLocs), 1), 'x', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'g');
             plot(self.mainPlot, session.timingInfo.incorrectOnsetLocs, zeros(length(session.timingInfo.incorrectOnsetLocs), 1), 'x', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'r');
             hold(self.mainPlot, 'off');
@@ -186,7 +187,7 @@ classdef ResultsPlot < handle
                 bottom = self.previewPlot.YLim(1);
                 rectWidth = self.mainPlot.XLim(2) -self.mainPlot.XLim(1);
                 height = self.previewPlot.YLim(2) - self.previewPlot.YLim(1);
-                self.zoomRectangle = rectangle(self.previewPlot, 'Position', [left, bottom, rectWidth, height], 'EdgeColor', 'none', 'FaceColor', Colours.transparentGrey);
+                self.zoomRectangle = rectangle(self.previewPlot, 'Position', [left, bottom, rectWidth, height], 'EdgeColor', 'none', 'FaceColor', Colours.transparentBlue);
             end
         end
 

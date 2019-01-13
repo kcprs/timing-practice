@@ -57,8 +57,16 @@ classdef OnsetInfoDisplayer < handle
                 delete(self.selectionCircle)
             end
 
+            if strcmp(self.selectedOnset.timing, 'OK')
+                markerColour = Colours.green;
+                rectColour = Colours.transparentGreen;
+            else
+                markerColour = Colours.red;
+                rectColour = Colours.transparentRed;
+            end
+
             hold(self.app.TimingPlot, 'on');
-            self.selectionCircle = plot(self.app.TimingPlot, self.selectedOnset.loc, 0, 'o', 'Color', 'k', 'MarkerSize', 20);
+            self.selectionCircle = plot(self.app.TimingPlot, self.selectedOnset.loc, 0, 'o', 'Color', markerColour, 'MarkerSize', 20, 'LineWidth', 2);
             hold(self.app.TimingPlot, 'off');
 
             if self.selectionRectangle ~= 0
@@ -81,8 +89,9 @@ classdef OnsetInfoDisplayer < handle
             end
 
             height = self.app.TimingPlot.YLim(2) - bottom;
-
-            self.selectionRectangle = rectangle(self.app.TimingPlot, 'Position', [left, bottom, rectWidth, height], 'EdgeColor', 'none', 'FaceColor', Colours.transparentBlue);
+            hold(self.app.TimingPlot, 'on');
+            self.selectionRectangle = rectangle(self.app.TimingPlot, 'Position', [left, bottom, rectWidth, height], 'EdgeColor', 'none', 'FaceColor', rectColour);
+            hold(self.app.TimingPlot, 'off');
         end
 
     end

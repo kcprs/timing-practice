@@ -26,6 +26,7 @@ classdef TimingInfo < handle
         correctNum;
         correctOnsetLocs;
         incorrectOnsetLocs;
+        detectionSensitivity;
     end
 
     methods
@@ -51,6 +52,7 @@ classdef TimingInfo < handle
             self.onsetInfoCursor = 1;
             self.minOnsetDist = self.detBufSize / 2;
             self.timingTolerance = session.fs / 100;
+            self.detectionSensitivity = session.app.DetectionSensitivityKnob.Value;
         end
 
         function addFrame(self, frame)
@@ -69,13 +71,26 @@ classdef TimingInfo < handle
 
         function cleanUp(self)
             cursor = 1;
+            gonePositive = false;
+            startCursor = 1;
 
-            while cursor <= length(self.onsetLocs) && self.onsetLocs(cursor) ~= 0
+            while cursor <= length(self.onsetLocs)
+
+                if self.onsetLocs(cursor) > 0 && not(gonePositive)
+                    startCursor = cursor;
+                    gonePositive = true;
+                end
+
                 cursor = cursor + 1;
+
+                if gonePositive && self.onsetLocs(cursor) == 0
+                    break;
+                end
+
             end
 
-            self.onsetLocs = self.onsetLocs(1:cursor - 1);
-            self.onsets = self.onsets(1:cursor - 1);
+            self.onsetLocs = self.onsetLocs(startCursor:cursor - 1);
+            self.onsets = self.onsets(startCursor:cursor - 1);
         end
 
         function runExtAnalysis(self)
@@ -165,7 +180,7 @@ classdef TimingInfo < handle
             self.maxNoveltyValue = max(maxBufVal, self.maxNoveltyValue);
             bufNovelty = bufNovelty / self.maxNoveltyValue;
             self.novelty(self.detBufLoc:self.detBufLoc + self.detBufSize - 1) = bufNovelty;
-            [~, newOnsetLocs] = findpeaks(bufNovelty, 'MinPeakProminence', 0.5, 'MinPeakDistance', self.minOnsetDist);
+            [~, newOnsetLocs] = findpeaks(bufNovelty, 'MinPeakProminence', 1 - self.detectionSensitivity, 'MinPeakDistance', self.minOnsetDist);
 
             numOnsets = length(newOnsetLocs);
 

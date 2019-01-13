@@ -107,9 +107,12 @@ classdef PracticeSession < handle
             self.resultsPlot.plotSession(self);
         end
 
-
         function stopPractice(~, app)
-            stop(app.player);
+
+            if app.player ~= 0
+                stop(app.player);
+            end
+
         end
 
         function recordPractice(self, app)
@@ -178,7 +181,6 @@ classdef PracticeSession < handle
             self.measuringLag = false;
         end
 
-        
         function cleanUp(self)
             self.audioIn = self.audioIn(1:self.audioCursor);
             self.timingInfo.analyseRemaining();
@@ -220,6 +222,7 @@ classdef PracticeSession < handle
             else
                 toPlay = app.RecordingVolumeSlider.Value^2 * self.lagCompAudioIn(int64(self.resultsPlot.playheadLoc):end) + app.MetronomeVolumeSlider.Value^2 * alignedMetro(int64(self.resultsPlot.playheadLoc):end);
             end
+
             app.player = audioplayer(toPlay, str2double(app.SampleRateDropDown.Value), 16, app.OutputDeviceDropDown.Value);
             set(app.player, 'StopFcn', @reactivateVolumeSlidersCallback);
             set(app.player, 'UserData', app);
@@ -227,9 +230,20 @@ classdef PracticeSession < handle
         end
 
         function stopPlayingFromCursor(~, app)
-            stop(app.player);
+
+            if app.player ~= 0
+                stop(app.player);
+            end
+
             app.RecordingVolumeSlider.Enable = true;
             app.MetronomeVolumeSlider.Enable = true;
+        end
+
+        function saveSessionSettings(~, app)
+            sensitivity = app.DetectionSensitivityKnob.Value;
+            sessionTempo = app.TempoField.Value;
+            sessionDuration = app.DurationField.Value;
+            save('resources/sessionSettings.mat', 'sensitivity', 'sessionTempo', 'sessionDuration');
         end
 
     end

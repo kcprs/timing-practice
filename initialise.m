@@ -1,5 +1,6 @@
 function initialise(app)
     app.session = PracticeSession(app);
+    app.player = 0;
 
     %% Find available I/O devices
     deviceInfo = audiodevinfo;
@@ -22,6 +23,13 @@ function initialise(app)
         lagStruct = load('resources/IOSettings.mat');
         app.InputDeviceDropDown.Value = lagStruct.inputDevice;
         app.OutputDeviceDropDown.Value = lagStruct.outputDevice;
+    end
+
+    if exist('resources/sessionSettings.mat', 'file')
+        sessionSettingsStruct = load('resources/sessionSettings.mat');
+        app.DetectionSensitivityKnob.Value = sessionSettingsStruct.sensitivity;
+        app.TempoField.Value = sessionSettingsStruct.sessionTempo;
+        app.DurationField.Value = sessionSettingsStruct.sessionDuration;
     end
 
 end

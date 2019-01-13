@@ -2,68 +2,70 @@
 
     % Properties that correspond to app components
     properties (Access = public)
-        UIFigure                    matlab.ui.Figure
-        TabGroup                    matlab.ui.container.TabGroup
-        MainTab                     matlab.ui.container.Tab
-        EarlyLampLabel              matlab.ui.control.Label
-        EarlyLamp                   matlab.ui.control.Lamp
-        OKLampLabel                 matlab.ui.control.Label
-        OKLamp                      matlab.ui.control.Lamp
-        LateLampLabel               matlab.ui.control.Label
-        LateLamp                    matlab.ui.control.Lamp
-        StartButton                 matlab.ui.control.Button
-        StopButton                  matlab.ui.control.Button
-        PracticeOptionsPanel        matlab.ui.container.Panel
-        TempoBPMEditFieldLabel      matlab.ui.control.Label
-        TempoField                  matlab.ui.control.NumericEditField
-        DurationminEditFieldLabel   matlab.ui.control.Label
-        DurationField               matlab.ui.control.NumericEditField
-        TimingGauge                 matlab.ui.control.LinearGauge
-        DropoutWarning              matlab.ui.control.TextArea
-        ResultsTab                  matlab.ui.container.Tab
-        TimingPlot                  matlab.ui.control.UIAxes
-        PlayheadSlider              matlab.ui.control.Slider
-        ZoomSlider                  matlab.ui.control.Slider
-        TimingPlotPreview           matlab.ui.control.UIAxes
-        PreviewPlayheadSlider       matlab.ui.control.Slider
-        SelectedOnsetResultsPanel   matlab.ui.container.Panel
-        TimingLabel                 matlab.ui.control.Label
-        ErrorLabel                  matlab.ui.control.Label
-        TimeLabel                   matlab.ui.control.Label
-        NextOnsetButton             matlab.ui.control.Button
-        PreviousOnsetButton         matlab.ui.control.Button
-        PreviousTickButton          matlab.ui.control.Button
-        NextTickButton              matlab.ui.control.Button
-        GlobalResultsPanel          matlab.ui.container.Panel
-        AverageErrorLabel           matlab.ui.control.Label
-        AverageLateErrorLabel       matlab.ui.control.Label
-        AverageEarlyErrorLabel      matlab.ui.control.Label
-        NumberOfEarlyOnsetsLabel    matlab.ui.control.Label
-        NumberOfLateOnsetsLabel     matlab.ui.control.Label
-        NumberOfCorrectOnsetsLabel  matlab.ui.control.Label
-        PlaybackPanel               matlab.ui.container.Panel
-        PlayFromCursorButton        matlab.ui.control.Button
-        ResultsStopButton           matlab.ui.control.Button
-        MetronomeVolumeSliderLabel  matlab.ui.control.Label
-        MetronomeVolumeSlider       matlab.ui.control.Slider
-        RecordingVolumeSliderLabel  matlab.ui.control.Label
-        RecordingVolumeSlider       matlab.ui.control.Slider
-        StopAfterOneOnsetCheckBox   matlab.ui.control.CheckBox
-        SettingsTab                 matlab.ui.container.Tab
-        SystemSettingsPanel         matlab.ui.container.Panel
-        SampleRateDropDownLabel     matlab.ui.control.Label
-        SampleRateDropDown          matlab.ui.control.DropDown
-        BufferSizeDropDownLabel     matlab.ui.control.Label
-        BufferSizeDropDown          matlab.ui.control.DropDown
-        InputDeviceDropDownLabel    matlab.ui.control.Label
-        InputDeviceDropDown         matlab.ui.control.DropDown
-        OutputDeviceDropDownLabel   matlab.ui.control.Label
-        OutputDeviceDropDown        matlab.ui.control.DropDown
-        AudioLagCompensationPanel   matlab.ui.container.Panel
-        MeasureAudioLagButton       matlab.ui.control.Button
-        AudioLagLabel               matlab.ui.control.Label
-        AudioLagLamp                matlab.ui.control.Lamp
-        AudioLagInstruction         matlab.ui.control.TextArea
+        UIFigure                       matlab.ui.Figure
+        TabGroup                       matlab.ui.container.TabGroup
+        PracticeTab                    matlab.ui.container.Tab
+        EarlyLampLabel                 matlab.ui.control.Label
+        EarlyLamp                      matlab.ui.control.Lamp
+        OKLampLabel                    matlab.ui.control.Label
+        OKLamp                         matlab.ui.control.Lamp
+        LateLampLabel                  matlab.ui.control.Label
+        LateLamp                       matlab.ui.control.Lamp
+        StartButton                    matlab.ui.control.Button
+        StopButton                     matlab.ui.control.Button
+        PracticeOptionsPanel           matlab.ui.container.Panel
+        TempoBPMEditFieldLabel         matlab.ui.control.Label
+        TempoField                     matlab.ui.control.NumericEditField
+        DurationminEditFieldLabel      matlab.ui.control.Label
+        DurationField                  matlab.ui.control.NumericEditField
+        DetectionSensitivityKnobLabel  matlab.ui.control.Label
+        DetectionSensitivityKnob       matlab.ui.control.Knob
+        TimingGauge                    matlab.ui.control.LinearGauge
+        DropoutWarning                 matlab.ui.control.TextArea
+        ResultsTab                     matlab.ui.container.Tab
+        TimingPlot                     matlab.ui.control.UIAxes
+        PlayheadSlider                 matlab.ui.control.Slider
+        ZoomSlider                     matlab.ui.control.Slider
+        TimingPlotPreview              matlab.ui.control.UIAxes
+        PreviewPlayheadSlider          matlab.ui.control.Slider
+        SelectedOnsetResultsPanel      matlab.ui.container.Panel
+        TimingLabel                    matlab.ui.control.Label
+        ErrorLabel                     matlab.ui.control.Label
+        TimeLabel                      matlab.ui.control.Label
+        NextOnsetButton                matlab.ui.control.Button
+        PreviousOnsetButton            matlab.ui.control.Button
+        PreviousTickButton             matlab.ui.control.Button
+        NextTickButton                 matlab.ui.control.Button
+        GlobalResultsPanel             matlab.ui.container.Panel
+        AverageErrorLabel              matlab.ui.control.Label
+        AverageLateErrorLabel          matlab.ui.control.Label
+        AverageEarlyErrorLabel         matlab.ui.control.Label
+        NumberOfEarlyOnsetsLabel       matlab.ui.control.Label
+        NumberOfLateOnsetsLabel        matlab.ui.control.Label
+        NumberOfCorrectOnsetsLabel     matlab.ui.control.Label
+        PlaybackPanel                  matlab.ui.container.Panel
+        PlayFromCursorButton           matlab.ui.control.Button
+        ResultsStopButton              matlab.ui.control.Button
+        MetronomeVolumeSliderLabel     matlab.ui.control.Label
+        MetronomeVolumeSlider          matlab.ui.control.Slider
+        RecordingVolumeSliderLabel     matlab.ui.control.Label
+        RecordingVolumeSlider          matlab.ui.control.Slider
+        StopAfterOneOnsetCheckBox      matlab.ui.control.CheckBox
+        SettingsTab                    matlab.ui.container.Tab
+        SystemSettingsPanel            matlab.ui.container.Panel
+        SampleRateDropDownLabel        matlab.ui.control.Label
+        SampleRateDropDown             matlab.ui.control.DropDown
+        BufferSizeDropDownLabel        matlab.ui.control.Label
+        BufferSizeDropDown             matlab.ui.control.DropDown
+        InputDeviceDropDownLabel       matlab.ui.control.Label
+        InputDeviceDropDown            matlab.ui.control.DropDown
+        OutputDeviceDropDownLabel      matlab.ui.control.Label
+        OutputDeviceDropDown           matlab.ui.control.DropDown
+        AudioLagCompensationPanel      matlab.ui.container.Panel
+        MeasureAudioLagButton          matlab.ui.control.Button
+        AudioLagLabel                  matlab.ui.control.Label
+        AudioLagLamp                   matlab.ui.control.Lamp
+        AudioLagInstruction            matlab.ui.control.TextArea
     end
 
     
@@ -154,6 +156,17 @@
         function ResultsStopButtonPushed(app, event)
             app.session.stopPlayingFromCursor(app);
         end
+
+        % Value changed function: DetectionSensitivityKnob
+        function DetectionSensitivityKnobValueChanged(app, event)
+            app.session.timingInfo.detectionSensitivity = app.DetectionSensitivityKnob.Value;
+            app.session.saveSessionSettings(app);
+        end
+
+        % Value changed function: DurationField, TempoField
+        function SessionSettingsChanged(app, event)
+            app.session.saveSessionSettings(app);
+        end
     end
 
     % App initialization and construction
@@ -165,7 +178,7 @@
             % Create UIFigure
             app.UIFigure = uifigure;
             app.UIFigure.AutoResizeChildren = 'off';
-            app.UIFigure.Position = [100 100 1163 750];
+            app.UIFigure.Position = [340 150 1163 750];
             app.UIFigure.Name = 'Timing Practice';
             app.UIFigure.Resize = 'off';
 
@@ -174,97 +187,113 @@
             app.TabGroup.AutoResizeChildren = 'off';
             app.TabGroup.Position = [1 1 1163 750];
 
-            % Create MainTab
-            app.MainTab = uitab(app.TabGroup);
-            app.MainTab.AutoResizeChildren = 'off';
-            app.MainTab.Title = 'Main';
+            % Create PracticeTab
+            app.PracticeTab = uitab(app.TabGroup);
+            app.PracticeTab.AutoResizeChildren = 'off';
+            app.PracticeTab.Title = 'Practice';
 
             % Create EarlyLampLabel
-            app.EarlyLampLabel = uilabel(app.MainTab);
+            app.EarlyLampLabel = uilabel(app.PracticeTab);
             app.EarlyLampLabel.HorizontalAlignment = 'right';
             app.EarlyLampLabel.Position = [95 486 33 22];
             app.EarlyLampLabel.Text = 'Early';
 
             % Create EarlyLamp
-            app.EarlyLamp = uilamp(app.MainTab);
+            app.EarlyLamp = uilamp(app.PracticeTab);
             app.EarlyLamp.Position = [143 405 183 183];
             app.EarlyLamp.Color = [0.902 0.902 0.902];
 
             % Create OKLampLabel
-            app.OKLampLabel = uilabel(app.MainTab);
+            app.OKLampLabel = uilabel(app.PracticeTab);
             app.OKLampLabel.HorizontalAlignment = 'right';
             app.OKLampLabel.Position = [458 485 25 22];
             app.OKLampLabel.Text = 'OK';
 
             % Create OKLamp
-            app.OKLamp = uilamp(app.MainTab);
+            app.OKLamp = uilamp(app.PracticeTab);
             app.OKLamp.Position = [498 405 181 181];
             app.OKLamp.Color = [0.902 0.902 0.902];
 
             % Create LateLampLabel
-            app.LateLampLabel = uilabel(app.MainTab);
+            app.LateLampLabel = uilabel(app.PracticeTab);
             app.LateLampLabel.HorizontalAlignment = 'right';
             app.LateLampLabel.Position = [811 485 29 22];
             app.LateLampLabel.Text = 'Late';
 
             % Create LateLamp
-            app.LateLamp = uilamp(app.MainTab);
+            app.LateLamp = uilamp(app.PracticeTab);
             app.LateLamp.Position = [855 405 181 181];
             app.LateLamp.Color = [0.902 0.902 0.902];
 
             % Create StartButton
-            app.StartButton = uibutton(app.MainTab, 'push');
+            app.StartButton = uibutton(app.PracticeTab, 'push');
             app.StartButton.ButtonPushedFcn = createCallbackFcn(app, @StartButtonPushed, true);
             app.StartButton.Position = [646 174 121 55];
             app.StartButton.Text = 'Start';
 
             % Create StopButton
-            app.StopButton = uibutton(app.MainTab, 'push');
+            app.StopButton = uibutton(app.PracticeTab, 'push');
             app.StopButton.ButtonPushedFcn = createCallbackFcn(app, @StopButtonPushed, true);
             app.StopButton.Position = [647 101 121 55];
             app.StopButton.Text = 'Stop';
 
             % Create PracticeOptionsPanel
-            app.PracticeOptionsPanel = uipanel(app.MainTab);
+            app.PracticeOptionsPanel = uipanel(app.PracticeTab);
             app.PracticeOptionsPanel.AutoResizeChildren = 'off';
             app.PracticeOptionsPanel.Title = 'Practice Options';
-            app.PracticeOptionsPanel.Position = [380 101 243 128];
+            app.PracticeOptionsPanel.Position = [270 101 353 128];
 
             % Create TempoBPMEditFieldLabel
             app.TempoBPMEditFieldLabel = uilabel(app.PracticeOptionsPanel);
             app.TempoBPMEditFieldLabel.HorizontalAlignment = 'right';
-            app.TempoBPMEditFieldLabel.Position = [24 65 79 22];
+            app.TempoBPMEditFieldLabel.Position = [141 65 79 22];
             app.TempoBPMEditFieldLabel.Text = 'Tempo (BPM)';
 
             % Create TempoField
             app.TempoField = uieditfield(app.PracticeOptionsPanel, 'numeric');
             app.TempoField.Limits = [40 320];
             app.TempoField.RoundFractionalValues = 'on';
-            app.TempoField.Position = [121 65 100 22];
+            app.TempoField.ValueChangedFcn = createCallbackFcn(app, @SessionSettingsChanged, true);
+            app.TempoField.Position = [238 65 100 22];
             app.TempoField.Value = 120;
 
             % Create DurationminEditFieldLabel
             app.DurationminEditFieldLabel = uilabel(app.PracticeOptionsPanel);
             app.DurationminEditFieldLabel.HorizontalAlignment = 'right';
-            app.DurationminEditFieldLabel.Position = [24 23 82 22];
+            app.DurationminEditFieldLabel.Position = [141 23 82 22];
             app.DurationminEditFieldLabel.Text = 'Duration (min)';
 
             % Create DurationField
             app.DurationField = uieditfield(app.PracticeOptionsPanel, 'numeric');
             app.DurationField.LowerLimitInclusive = 'off';
             app.DurationField.Limits = [0 60];
-            app.DurationField.Position = [121 23 100 22];
-            app.DurationField.Value = 0.1;
+            app.DurationField.ValueChangedFcn = createCallbackFcn(app, @SessionSettingsChanged, true);
+            app.DurationField.Position = [238 23 100 22];
+            app.DurationField.Value = 1;
+
+            % Create DetectionSensitivityKnobLabel
+            app.DetectionSensitivityKnobLabel = uilabel(app.PracticeOptionsPanel);
+            app.DetectionSensitivityKnobLabel.HorizontalAlignment = 'center';
+            app.DetectionSensitivityKnobLabel.Position = [17 5 114 22];
+            app.DetectionSensitivityKnobLabel.Text = 'Detection Sensitivity';
+
+            % Create DetectionSensitivityKnob
+            app.DetectionSensitivityKnob = uiknob(app.PracticeOptionsPanel, 'continuous');
+            app.DetectionSensitivityKnob.Limits = [0.1 0.9];
+            app.DetectionSensitivityKnob.MajorTickLabels = {' '};
+            app.DetectionSensitivityKnob.ValueChangedFcn = createCallbackFcn(app, @DetectionSensitivityKnobValueChanged, true);
+            app.DetectionSensitivityKnob.Position = [44 32 60 60];
+            app.DetectionSensitivityKnob.Value = 0.5;
 
             % Create TimingGauge
-            app.TimingGauge = uigauge(app.MainTab, 'linear');
+            app.TimingGauge = uigauge(app.PracticeTab, 'linear');
             app.TimingGauge.Limits = [-1 1];
             app.TimingGauge.ScaleColors = [1 0 0;0 1 0;1 0 0;1 0.8667 0;1 0.8706 0];
             app.TimingGauge.ScaleColorLimits = [-1 -0.5;-0.05 0.05;0.5 1;-0.5 -0.05;0.05 0.5];
             app.TimingGauge.Position = [72 317 1021.984375 40];
 
             % Create DropoutWarning
-            app.DropoutWarning = uitextarea(app.MainTab);
+            app.DropoutWarning = uitextarea(app.PracticeTab);
             app.DropoutWarning.Editable = 'off';
             app.DropoutWarning.BackgroundColor = [1 0.6392 0.6392];
             app.DropoutWarning.Visible = 'off';
