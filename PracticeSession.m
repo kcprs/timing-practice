@@ -116,30 +116,31 @@ classdef PracticeSession < handle
         end
 
         function recordPractice(self, app)
-            tic;
+            % tic;
 
-            while app.player.isplaying() && toc <= self.duration + 1
-                drawnow();
-                [audioFrame, numOverrun] = app.deviceReader();
+            % while app.player.isplaying() && toc <= self.duration + 1
+            %     drawnow();
+            %     [audioFrame, numOverrun] = app.deviceReader();
 
-                if numOverrun ~= 0
-                    app.DropoutWarning.Visible = true;
-                end
+            %     if numOverrun ~= 0
+            %         app.DropoutWarning.Visible = true;
+            %     end
 
-                self.addFrame([zeros(numOverrun, 1); audioFrame]);
-            end
+            %     self.addFrame([zeros(numOverrun, 1); audioFrame]);
+            % end
 
             % Debug
-            % cursor = 1;
-            % frameSize = 256;
-            % testAudio = audioread('resources/test.wav');
+            cursor = 1;
+            frameSize = 512;
+            testAudio = audioread('resources/testPiano.wav');
 
-            % while cursor + frameSize < length(testAudio)
-            %     audioFrame = testAudio(cursor:cursor + frameSize - 1);
-            %     cursor = cursor + frameSize;
-            %     self.addFrame(audioFrame);
-            %     pause(length(audioFrame) / self.fs);
-            % end
+            while cursor + frameSize < length(testAudio)
+                audioFrame = testAudio(cursor:cursor + frameSize - 1);
+                cursor = cursor + frameSize;
+                self.addFrame(audioFrame);
+                % pause(length(audioFrame) / self.fs);
+            end
+
         end
 
         function measureAudioLag(self, app)
@@ -209,6 +210,8 @@ classdef PracticeSession < handle
                 alignedMetro = [self.metronome.audio; zeros(length(self.lagCompAudioIn) - length(self.metronome.audio), 1)];
             end
 
+            startIndex = max(1, int64(self.resultsPlot.playheadLoc));
+
             if app.StopAfterOneOnsetCheckBox.Value
                 cursor = 1;
 
@@ -218,15 +221,20 @@ classdef PracticeSession < handle
 
                 stopIndex = self.timingInfo.onsets(cursor + 1).loc;
 
-                toPlay = app.RecordingVolumeSlider.Value^2 * self.lagCompAudioIn(int64(self.resultsPlot.playheadLoc):stopIndex) + app.MetronomeVolumeSlider.Value^2 * alignedMetro(int64(self.resultsPlot.playheadLoc):stopIndex);
+                toPlay = app.RecordingVolumeSlider.Value^2 * self.lagCompAudioIn(startIndex:stopIndex) + app.MetronomeVolumeSlider.Value^2 * alignedMetro(startIndex:stopIndex);
             else
-                toPlay = app.RecordingVolumeSlider.Value^2 * self.lagCompAudioIn(int64(self.resultsPlot.playheadLoc):end) + app.MetronomeVolumeSlider.Value^2 * alignedMetro(int64(self.resultsPlot.playheadLoc):end);
+                toPlay = app.RecordingVolumeSlider.Value^2 * self.lagCompAudioIn(startIndex:end) + app.MetronomeVolumeSlider.Value^2 * alignedMetro(startIndex:end);
             end
 
-            app.player = audioplayer(toPlay, str2double(app.SampleRateDropDown.Value), 16, app.OutputDeviceDropDown.Value);
-            set(app.player, 'StopFcn', @reactivateVolumeSlidersCallback);
-            set(app.player, 'UserData', app);
-            play(app.player);
+            if ~isempty(toPlay)
+                app.player = audioplayer(toPlay, str2double(app.SampleRateDropDown.Value), 16, app.OutputDeviceDropDown.Value);
+                set(app.player, 'StopFcn', @reactivateVolumeSlidersCallback);
+                set(app.player, 'UserData', app);
+                set(app.player, 'TimerPeriod', 1/8);
+                set(app.player, 'TimerFcn', @movePlayheadCallback)
+                play(app.player);
+            end
+
         end
 
         function stopPlayingFromCursor(~, app)

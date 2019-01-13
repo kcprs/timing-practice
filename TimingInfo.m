@@ -32,8 +32,8 @@ classdef TimingInfo < handle
     methods
 
         function self = TimingInfo()
-            self.fftSize = 128; % Keep this low to maintain high accuracy
-            self.hopSize = 128;
+            self.fftSize = 2048; 
+            self.hopSize = 128; % Keep this low to maintain high accuracy
             self.audioLag = 0;
         end
 
@@ -83,7 +83,7 @@ classdef TimingInfo < handle
 
                 cursor = cursor + 1;
 
-                if gonePositive && self.onsetLocs(cursor) == 0
+                if cursor <= length(self.onsetLocs) && gonePositive && self.onsetLocs(cursor) == 0
                     break;
                 end
 
@@ -154,33 +154,38 @@ classdef TimingInfo < handle
 
     methods (Access = private)
 
+        function novelty = getNovelty(self, currentFrame, previousFrame)
+            frameFFT = fft(currentFrame .* hann(self.fftSize));
+            previousFrameFFT = fft(previousFrame .* hann(self.fftSize));
+            fftDifference = abs(frameFFT(1:self.fftSize / 2 - 1)) - abs(previousFrameFFT(1:self.fftSize / 2 - 1));
+            fftDifferenceNorm = fftDifference .* linspace(1, self.fftSize / 2 - 1, self.fftSize / 2 - 1)';
+            specFlux = sum(fftDifferenceNorm);
+            framePower = sum(currentFrame.^2);
+            novelty = specFlux * framePower;
+        end
+
         function newOnsetLocs = detectOnsets(self)
             cursor = 1;
             bufNovelty = zeros(self.detBufSize, 1); % TODO: Store one value per FFT frame
-            previousFrameFFT = fft(self.detBuf.prepreviousData(end - self.fftSize + 1:end) .* hann(self.fftSize));
+            previousFrame = self.detBuf.prepreviousData(end - self.fftSize + 1:end);
 
             while cursor + self.fftSize <= self.detBufSize
-
-                frameFFT = fft(self.detBuf.previousData(cursor:cursor + self.fftSize - 1) .* hann(self.fftSize));
-                fftDifference = abs(frameFFT(1:self.fftSize / 2 - 1)) - abs(previousFrameFFT(1:self.fftSize / 2 - 1));
-
-                bufNovelty(cursor:cursor + self.hopSize - 1) = sum(fftDifference); % Keeping the sign of the difference helps differentiate between note on and note off
-
-                previousFrameFFT = frameFFT;
+                frame = self.detBuf.previousData(cursor:cursor + self.fftSize - 1);
+                bufNovelty(cursor:cursor + self.hopSize - 1) = bufNovelty(cursor:cursor + self.hopSize - 1) + self.getNovelty(frame, previousFrame);
+                previousFrame = frame;
                 cursor = cursor + self.hopSize;
             end
 
             numRemaining = self.detBufSize - cursor;
             padLen = self.fftSize - numRemaining - 1;
-            frameFFT = fft(([self.detBuf.previousData(cursor:end); zeros(padLen, 1)]) .* hann(self.fftSize));
-            fftDifference = abs(frameFFT(1:self.fftSize / 2 - 1)) - abs(previousFrameFFT(1:self.fftSize / 2 - 1));
-            bufNovelty(cursor:end) = sum(fftDifference);
+            frame = [self.detBuf.previousData(cursor:end); zeros(padLen, 1)];
+            bufNovelty(cursor:end) = bufNovelty(cursor:end) + self.getNovelty(frame, previousFrame);
 
             maxBufVal = max(bufNovelty);
             self.maxNoveltyValue = max(maxBufVal, self.maxNoveltyValue);
             bufNovelty = bufNovelty / self.maxNoveltyValue;
             self.novelty(self.detBufLoc:self.detBufLoc + self.detBufSize - 1) = bufNovelty;
-            [~, newOnsetLocs] = findpeaks(bufNovelty, 'MinPeakProminence', 1 - self.detectionSensitivity, 'MinPeakDistance', self.minOnsetDist);
+            [~, newOnsetLocs] = findpeaks(bufNovelty, 'MinPeakProminence', 1 - self.detectionSensitivity);%, 'MinPeakDistance', self.minOnsetDist);
 
             numOnsets = length(newOnsetLocs);
 

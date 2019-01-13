@@ -103,6 +103,8 @@ classdef ResultsPlot < handle
                 return;
             end
 
+            sampleLoc = max(1, min(sampleLoc, length(self.session.lagCompAudioIn)));
+
             % If the user accidentally scrolled the plots by clicking and dragging within the plot, reset limits
             self.previewPlot.XLim = self.initPreviewXLim;
             self.previewPlot.YLim = [-1, 1];
@@ -163,7 +165,7 @@ classdef ResultsPlot < handle
             self.session.app.ZoomSlider.Value = zoomFactor;
 
             initSpan = self.initXLim(2) - self.initXLim(1);
-            maxZoomSpan = self.session.fs;
+            maxZoomSpan = 128;%self.session.fs;
             currentSpan = initSpan - zoomFactor * (initSpan - maxZoomSpan);
 
             leftBoundRequested = self.playheadLoc - currentSpan / 2;

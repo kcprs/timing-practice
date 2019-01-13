@@ -74,8 +74,6 @@ classdef OnsetInfoDisplayer < handle
             end
 
             left = self.selectedOnset.loc;
-            bottom = self.app.TimingPlot.YLim(1);
-
             cursor = 1;
 
             while cursor <= length(self.onsets) && self.onsets(cursor).loc < left
@@ -88,9 +86,8 @@ classdef OnsetInfoDisplayer < handle
                 rectWidth = self.app.TimingPlot.XLim(2) - left;
             end
 
-            height = self.app.TimingPlot.YLim(2) - bottom;
             hold(self.app.TimingPlot, 'on');
-            self.selectionRectangle = rectangle(self.app.TimingPlot, 'Position', [left, bottom, rectWidth, height], 'EdgeColor', 'none', 'FaceColor', rectColour);
+            self.selectionRectangle = rectangle(self.app.TimingPlot, 'Position', [left, -1, rectWidth, 2], 'EdgeColor', 'none', 'FaceColor', rectColour);
             hold(self.app.TimingPlot, 'off');
         end
 
