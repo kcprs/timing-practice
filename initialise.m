@@ -1,8 +1,12 @@
 function initialise(app)
+    % initialise Sets the initial values for the app object.
+    %   This function is called right after the app starts.
+
     app.session = PracticeSession(app);
     app.player = 0;
 
-    %% Find available I/O devices
+    %% Find available I/O devices and fill the corresponding DropDown boxes
+    % Outputs
     deviceInfo = audiodevinfo;
     outputDevices = deviceInfo.output;
 
@@ -14,11 +18,13 @@ function initialise(app)
         app.OutputDeviceDropDown.ItemsData(iter) = outputDevices(iter).ID;
     end
 
+    % Inputs
     app.deviceReader = audioDeviceReader('SampleRate', str2double(app.SampleRateDropDown.Value), 'SamplesPerFrame', str2double(app.BufferSizeDropDown.Value));
     inputDevices = app.deviceReader.getAudioDevices();
     app.InputDeviceDropDown.Items = strings(length(inputDevices), 0);
     app.InputDeviceDropDown.Items = inputDevices;
 
+    %% Load previously saved settings, if exist
     if exist('resources/IOSettings.mat', 'file')
         lagStruct = load('resources/IOSettings.mat');
         app.InputDeviceDropDown.Value = lagStruct.inputDevice;
