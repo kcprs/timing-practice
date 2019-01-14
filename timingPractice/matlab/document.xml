@@ -76,9 +76,9 @@
 
     
     properties (Access = public)
-        session;
-        player;
-        deviceReader;
+        session;        % Handle of the current session object
+        player;         % Handle of the audioplayer object
+        deviceReader;   % Handle of the audioDeviceReader object
     end
     
 
