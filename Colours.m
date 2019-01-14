@@ -1,4 +1,5 @@
 classdef Colours
+    % Colours Provides constants for colour values used in the app 
 
     properties (Constant)
         green = [0.0, 1.0, 0.0];
