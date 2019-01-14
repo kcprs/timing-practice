@@ -15,6 +15,7 @@ classdef ResultsPlot < handle
         onsetInfoDisplayer;
         zoomRectangle;
         initPreviewXLim;
+        initPreviewYLim;
     end
 
     methods
@@ -31,6 +32,7 @@ classdef ResultsPlot < handle
             self.zoomFactor = 0;
             self.initXLim = [0, 1];
             self.initPreviewXLim = [0, 1];
+            self.initPreviewYLim = [-1, 1];
             self.zoomRectangle = 0;
         end
 
@@ -45,7 +47,7 @@ classdef ResultsPlot < handle
             plot(self.previewPlot, session.lagCompAudioIn);
             self.initPreviewXLim = [leftBound, rightBound];
             self.previewPlot.XLim = [leftBound, rightBound];
-            self.previewPlot.YLim = [-1, 1];
+            self.initPreviewYLim = self.previewPlot.YLim;
 
             % Plot the detailed plot in the main figure
             plot(self.mainPlot, session.lagCompAudioIn);
@@ -111,7 +113,7 @@ classdef ResultsPlot < handle
 
             % If the user accidentally scrolled the plots by clicking and dragging within the plot, reset limits
             self.previewPlot.XLim = self.initPreviewXLim;
-            self.previewPlot.YLim = [-1, 1];
+            self.previewPlot.YLim = self.initPreviewYLim;
             self.mainPlot.YLim = self.initYLim;
 
             % Save playhead location
@@ -162,7 +164,7 @@ classdef ResultsPlot < handle
 
             % If the user accidentally scrolled the plots by clicking and dragging within the plot, reset limits
             self.previewPlot.XLim = self.initPreviewXLim;
-            self.previewPlot.YLim = [-1, 1];
+            self.previewPlot.YLim = self.initPreviewYLim;
             self.mainPlot.YLim = self.initYLim;
 
             self.zoomFactor = zoomFactor;

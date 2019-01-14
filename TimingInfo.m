@@ -70,6 +70,8 @@ classdef TimingInfo < handle
         end
 
         function cleanUp(self)
+            self.analyseRemaining();
+
             cursor = 1;
             gonePositive = false;
             startCursor = 1;
