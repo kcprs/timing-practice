@@ -182,6 +182,7 @@
         % Value changed function: PermissibleErrorField
         function PermissibleErrorFieldValueChanged(app, event)
             app.session.timingInfo.timingTolerance = app.PermissibleErrorField.Value * app.session.fs / 1000;
+            app.session.saveSessionSettings(app);
         end
     end
 
