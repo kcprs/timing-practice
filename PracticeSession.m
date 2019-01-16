@@ -1,3 +1,5 @@
+% Kacper Sagnowski, Musical Performance Analysis Systems assignment
+
 classdef PracticeSession < handle
     % PracticeSession Stores all information of a practice session
     %   A practice session consists of a single recording of the user

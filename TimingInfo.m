@@ -1,3 +1,5 @@
+% Kacper Sagnowski, Musical Performance Analysis Systems assignment
+
 classdef TimingInfo < handle
     % TimingInfo Holds information about all timing information in a practice session, e.g. onsets or latency
 

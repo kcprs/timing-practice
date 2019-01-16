@@ -1,3 +1,5 @@
+% Kacper Sagnowski, Musical Performance Analysis Systems assignment
+
 function initialise(app)
     % initialise Sets the initial values for the app object.
     %   This function is called right after the app starts.

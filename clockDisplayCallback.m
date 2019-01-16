@@ -1,3 +1,5 @@
+% Kacper Sagnowski, Musical Performance Analysis Systems assignment
+
 function clockDisplayCallback(player, ~)
     % clockDisplayCallback Updates the clock display on the "Practice" tab of the app.
     %   This function is called every second by the timer of MATLAB's audioplayer object.

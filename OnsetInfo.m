@@ -1,3 +1,5 @@
+% Kacper Sagnowski, Musical Performance Analysis Systems assignment
+
 classdef OnsetInfo < handle
     % OnsetInfo Class that holds timing information of a single onset
 

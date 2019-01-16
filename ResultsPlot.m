@@ -1,3 +1,5 @@
+% Kacper Sagnowski, Musical Performance Analysis Systems assignment
+
 classdef ResultsPlot < handle
     % ResultsPlot Handles plotting session results in the "Results" tab
 

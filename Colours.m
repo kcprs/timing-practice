@@ -1,3 +1,5 @@
+% Kacper Sagnowski, Musical Performance Analysis Systems assignment
+
 classdef Colours
     % Colours Provides constants for colour values used in the app 
 

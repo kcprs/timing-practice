@@ -1,3 +1,5 @@
+% Kacper Sagnowski, Musical Performance Analysis Systems assignment
+
 classdef OnsetInfoDisplayer < handle
     % OnsetInfoDisplayer Class for graphically displaying timing info of onsets
 

@@ -76,6 +76,8 @@
 
     
     properties (Access = public)
+% Kacper Sagnowski, Musical Performance Analysis Systems assignment  
+
         session;        % Handle of the current session object
         player;         % Handle of the audioplayer object
         deviceReader;   % Handle of the audioDeviceReader object

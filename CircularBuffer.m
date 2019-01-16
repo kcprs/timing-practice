@@ -1,3 +1,5 @@
+% Kacper Sagnowski, Musical Performance Analysis Systems assignment
+
 classdef CircularBuffer < handle
     % CircularBuffer A circular buffer with memory of past states
     %   When written to, appends the given vector to its data vector.

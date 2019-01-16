@@ -1,3 +1,5 @@
+% Kacper Sagnowski, Musical Performance Analysis Systems assignment
+
 function saveIoSettings(app)
     % saveIoSettings Saves I/O settings of the app to a file for later use
 

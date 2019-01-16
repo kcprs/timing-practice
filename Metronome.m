@@ -1,3 +1,5 @@
+% Kacper Sagnowski, Musical Performance Analysis Systems assignment
+
 classdef Metronome < handle
     % Metronome Provides metronome functionality to the app
 
