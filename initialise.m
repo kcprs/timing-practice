@@ -28,9 +28,21 @@ function initialise(app)
 
     %% Load previously saved settings, if exist
     if exist('resources/IOSettings.mat', 'file')
-        lagStruct = load('resources/IOSettings.mat');
-        app.InputDeviceDropDown.Value = lagStruct.inputDevice;
-        app.OutputDeviceDropDown.Value = lagStruct.outputDevice;
+        ioSettingsStruct = load('resources/IOSettings.mat');
+
+        % May fail if saved value is still available
+        try
+            app.InputDeviceDropDown.Value = ioSettingsStruct.inputDevice;
+        catch
+            % Do nothing
+        end
+        
+        % May fail if saved value is still available
+        try
+            app.OutputDeviceDropDown.Value = ioSettingsStruct.outputDevice;
+        catch
+            % Do nothing
+        end
     end
 
     if exist('resources/sessionSettings.mat', 'file')
