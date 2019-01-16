@@ -328,7 +328,7 @@
             app.DropoutWarning.BackgroundColor = [1 0.6392 0.6392];
             app.DropoutWarning.Visible = 'off';
             app.DropoutWarning.Position = [753 111 235 55];
-            app.DropoutWarning.Value = {'Audio dropouts detected. Please increase the buffer size in the "Settings" tab.'};
+            app.DropoutWarning.Value = {'Audio dropouts detected. Please increase the buffer size or decrease the sampling frequency in the "Settings" tab.'};
 
             % Create ClockLabel
             app.ClockLabel = uilabel(app.PracticeTab);
